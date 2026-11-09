@@ -119,8 +119,8 @@ module.exports = function (h) {
     return more > 0 ? `${shown} ${say(lang, 'locations', 'origin more', { 'pt-BR': `e mais ${n(lang, more)}`, en: `and ${n(lang, more)} more` })}` : shown;
   }
   const unknownOriginNote = lang => say(lang, 'locations', 'origin unknown (no owner found for the trait in extracted data)', {
-    'pt-BR': 'Os dados extraídos do jogo não mostram o que libera estas ações. A origem é desconhecida.',
-    en: 'The game data does not show what unlocks these actions.',
+    'pt-BR': 'O que libera estas ações é desconhecido.',
+    en: 'What unlocks these actions is unknown.',
   });
 
   // Sorteio de Missões da Vexcorp por mapa. ResourceUtils.FilterWeightedRewardsForCurrentMap tira da lista, antes do sorteio,

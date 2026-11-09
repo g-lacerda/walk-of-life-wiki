@@ -182,7 +182,7 @@ module.exports = function (h) {
   }
 
   function gameTextCallout(lang, m, s) {
-    return callout(s('label game text', 'Texto do jogo', "Game's text"), `<p>${flavorPlain(lang, m)}</p><p>${s('not confirmed note', 'Não confirmamos os detalhes no código nem nos dados: a linha acima é a descrição oficial do jogo.', 'We could not confirm the details in the game code or data: the line above is the official game description.')}</p>`);
+    return callout(s('label game text', 'Texto do jogo', "Game's text"), `<p>${flavorPlain(lang, m)}</p>`);
   }
   const flavorPlain = (lang, m) => { const t = tx(lang, m.FlavorTerm); return t ? spanLang(lang, t) : ''; };
 

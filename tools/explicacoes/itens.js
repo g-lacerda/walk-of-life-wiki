@@ -722,7 +722,7 @@ module.exports = function criar(getCtx) {
     if (it.m_Name === 'Abyssal CV') {
       const a = [...(c.consume.get(it._id) || [])][0];
       const tempo = a ? -c.sumAttr(a.Rewards, 'Time') : 0;
-      return P('worth abyssal cv (SellValue, Cultist - Hand in Abyssal CV: only Time in Rewards)', `Duas saídas: vender por ${n(sell)} na ${pawn}, ou entregar na Agência${tempo ? ` (${n(tempo)} de Tempo)` : ''}. Segundo o texto do jogo, a entrega avança você para o próximo nível de EXP de Trabalho, mas os dados da ação só mostram o gasto de Tempo e não dizem quanto isso vale, então o ganho exato só dá para conferir jogando. Entre os currículos, este é o que mais rende na venda (Currículo Ouro ${n(c.items.find(i => i.m_Name === 'Gold CV').SellValue)}).`, `Two options: sell for ${n(sell)} at the ${pawn}, or hand it in at the Job Office${tempo ? ` (${n(tempo)} Time)` : ''}. According to the game text, handing it in moves you to the next Work XP level, but the action data only shows the Time cost and does not say how much that is worth, so the exact gain can only be checked by playing. Among the CVs, this one sells for the most (Gold CV ${n(c.items.find(i => i.m_Name === 'Gold CV').SellValue)}).`);
+      return P('worth abyssal cv (SellValue, Cultist - Hand in Abyssal CV: only Time in Rewards)', `Duas saídas: vender por ${n(sell)} na ${pawn}, ou entregar na Agência${tempo ? ` (${n(tempo)} de Tempo)` : ''}. Segundo o texto do jogo, a entrega avança você para o próximo nível de EXP de Trabalho. O ganho exato é desconhecido. Entre os currículos, este é o que mais rende na venda (Currículo Ouro ${n(c.items.find(i => i.m_Name === 'Gold CV').SellValue)}).`, `Two options: sell for ${n(sell)} at the ${pawn}, or hand it in at the Job Office${tempo ? ` (${n(tempo)} Time)` : ''}. According to the game text, handing it in moves you to the next Work XP level. The exact gain is unknown. Among the CVs, this one sells for the most (Gold CV ${n(c.items.find(i => i.m_Name === 'Gold CV').SellValue)}).`);
     }
     const yw = yieldWorth(K, it);
     if (yw) return yw;
@@ -906,7 +906,7 @@ module.exports = function criar(getCtx) {
   // Itens sem frase própria no jogo ganham uma linha de abertura.
   function leadText(K, it) {
     const species = { dog: ['cachorro', 'dog'], cat: ['gato', 'cat'], chicken: ['galinha', 'chicken'], frog: ['sapo', 'frog'], bird: ['pássaro', 'bird'], snake: ['cobra', 'snake'], turtle: ['tartaruga', 'turtle'], rock: ['pedra', 'rock'], pig: ['porco', 'pig'], panda: ['panda-vermelho', 'red panda'] }[petKind(it)];
-    if (it.Purpose === 7 && !shopActs(K.c, it).length) return K.s('lead pet no source (no Buy Pet action)', 'Um pet sem ação de compra nos dados do jogo.', 'A pet with no purchase action in the game data.');
+    if (it.Purpose === 7 && !shopActs(K.c, it).length) return '';
     if (it.Purpose === 7) return K.s('lead pet', `Um pet${species ? ` (${species[0]})` : ''} que você compra na Pet Shop.`, `A pet${species ? ` (${species[1]})` : ''} you buy at the Pet Shop.`);
     if (it.ItemSubGroup === 8 && !(it.SellValue > 0)) return K.s('lead quest item', 'Item de missão: só serve dentro da missão.', 'Quest item: it only works inside the quest.');
     if (it.Purpose === 4) return K.s('lead furniture', `Móvel${it.Tier ? ` de nível ${it.Tier}` : ''} para a sua casa.`, `Furniture${it.Tier ? ` of tier ${it.Tier}` : ''} for your home.`);
@@ -935,9 +935,8 @@ module.exports = function criar(getCtx) {
     K.origin = obtainHtml.length > 0 || c.startingGear.has(it._id);
     if (obtainHtml.length) calls.push(c.callout(c.ui(lang, 'obtain'), `<ul class="plain">${[...new Set(obtainHtml)].slice(0, 16).join('')}</ul>`));
     else {
-      const notas = require('./itens-sem-fonte')(K, it);
-      const aviso = K.s('absence is not proof (docs: Ausencia nao e prova)', 'Se aparecer no jogo, vale o que o jogo mostra.', 'If you see it in the game, trust what the game shows.');
-      calls.push(c.callout(c.ui(lang, 'obtain'), notas ? `${notas.map(p => `<p>${p}</p>`).join('')}${notas.confirmado ? '' : `<p>${aviso}</p>`}` : `<p>${K.s('no origin in data (no action, quest, event, role or shop gives it)', 'Este item não tem fonte conhecida: nenhuma loja, ação, missão, evento ou papel o entrega nos dados do jogo.', 'This item has no known source: no shop, action, quest, event or role in the game data gives it.')} ${aviso}</p>`));
+      const notas = require('./itens-sem-fonte')(K, it, { emLugar });
+      calls.push(c.callout(c.ui(lang, 'obtain'), notas ? notas.map(p => `<p>${p}</p>`).join('') : `<p>${K.s('origin unknown (no action, quest, event, role or shop gives it)', 'A origem deste item é desconhecida.', 'The origin of this item is unknown.')}</p>`));
     }
 
     // Para que serve
@@ -1003,12 +1002,15 @@ module.exports = function criar(getCtx) {
     // móveis
     if (it.Purpose === 4) calls.push(...furnitureCallouts(K, it));
     // Venda
+    let w = worth(K, it);
+    const abreComVenda = w && it.SellValue > 0 && w.startsWith(K.pt ? `Rende ${K.n(it.SellValue)} na ${pawn}` : `It pays ${K.n(it.SellValue)} at the ${pawn}`);
+    const generico = abreComVenda && w === K.s('worth generic (SellValue)', `Rende ${K.n(it.SellValue)} na ${pawn}.`, `It pays ${K.n(it.SellValue)} at the ${pawn}.`);
     if (it.SellValue > 0 && it.m_Name !== 'Friendship Crate') {
       const used = uses.length || it.Purpose === 6 || it.Purpose === 8 || it.Purpose === 4 || it.Purpose === 3 || it.Purpose === 7 || c.isStock(it) || it.ScoreBonus > 0 || [1].includes(it.Purpose) && ((it.Rewards || {}).RewardEntries || []).some(e => e.Type === 110);
-      calls.push(c.callout(c.ui(lang, 'sell'), `<p>${K.s(used ? 'sell value (GetPawnRewardsForItem)' : 'only sell (no pointer in game data, GetPawnRewardsForItem)', used ? `Na ${pawn}, rende ${K.n(it.SellValue)}.` : `Serve só para vender: rende ${K.n(it.SellValue)} na ${pawn}.`, used ? `At the ${pawn}, it fetches ${K.n(it.SellValue)}.` : `It is only good for selling: it fetches ${K.n(it.SellValue)} at the ${pawn}.`)}</p>`));
+      if (generico && !used) w = K.s('only sell (no pointer in game data, GetPawnRewardsForItem)', `Serve só para vender: rende ${K.n(it.SellValue)} na ${pawn}.`, `It is only good for selling: it fetches ${K.n(it.SellValue)} at the ${pawn}.`);
+      if (!abreComVenda) calls.push(c.callout(c.ui(lang, 'sell'), `<p>${K.s(used ? 'sell value (GetPawnRewardsForItem)' : 'only sell (no pointer in game data, GetPawnRewardsForItem)', used ? `Na ${pawn}, rende ${K.n(it.SellValue)}.` : `Serve só para vender: rende ${K.n(it.SellValue)} na ${pawn}.`, used ? `At the ${pawn}, it fetches ${K.n(it.SellValue)}.` : `It is only good for selling: it fetches ${K.n(it.SellValue)} at the ${pawn}.`)}</p>`));
     }
     // Vale a pena?
-    let w = worth(K, it);
     if (w && courses.length && it.Purpose !== 4) w += ' ' + K.s('worth course need (EducationData.RequiredItems)', `Ele é exigido ${courses.length > 1 ? 'pelos cursos' : 'pelo curso'} ${[...new Set(courses)].join(', ')}, então não venda todos antes de fazê-lo.`, `It is required by ${courses.length > 1 ? 'the courses' : 'the course'} ${[...new Set(courses)].join(', ')}, so do not sell them all before taking it.`);
     if (w) calls.push(c.callout(K.s('label worth it', 'Vale a pena?', 'Is it worth it?'), `<p>${w}</p>`));
     const lead = c.flavor(lang, it) ? '' : leadText(K, it);

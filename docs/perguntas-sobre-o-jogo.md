@@ -158,3 +158,9 @@ Resolvido nesta verificação: os 8 cursos sem departamento (tipo 5) são sortea
 - **Começar Ritual em casa e no Parque:** `Quest-Cultist-Ritual-Start-Home` e `-Park` existem fora das cadeias. A página lista só Clucker's, Academia e Banco, que são os locais usados nas cadeias.
 - **Lançar Maldição na Faculdade:** `Quest-Cultist-Ritual-t3-25` não está em cadeia, e o texto dela fala em Parque, enquanto o efeito aponta para a Faculdade.
 - **Interdição do Hacker pego:** o código cria o bloqueio com duração 3 e a constante `BustLockoutTurns` vale 1. Pela leitura de `TickLockedBuildings`, seriam 3 rodadas. Confirmar jogando quantas rodadas os lugares ficam fechados. A página diz "por um tempo".
+
+## Origem desconhecida (lote de reescrita)
+
+- Mining Laser, minérios, Comida Detox, Dinheiro Sujo, Caixa de Pragas, Dinosaur Bone 2, Piece of Diploma, Ovelha e Tatu: a origem segue desconhecida. Não confirmamos em código nem dados, e as páginas dizem só "origem desconhecida".
+- O que a devolução de Dever de Casa Perdido rende foi resolvido: 2 estudos do curso em andamento na sala (`EducationManager.ReturnHomework`). Falta só a origem do item.
+- `Caixa de Pragas`: a ação de pegar não mexe no item pelos dados; o jogo pode entregar ou não o item por outro caminho. Confirmar jogando um ritual.

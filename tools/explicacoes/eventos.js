@@ -106,13 +106,13 @@ module.exports = function (h) {
       const needs = tags.length ? ` ${say(lang, P, 'chain plus held requirement (NonNegotiable TagRequirements)', { 'pt-BR': `Além disso, só sai enquanto ${tags.map(lowerFirst).join(' e ')}.`, en: `Also, it only appears while ${tags.map(lowerFirst).join(' and ')}.` })}` : '';
       return { text: `${chain}${needs}`, keepBlockers: true };
     }
-    if (tags.length) return { text: [`${tags.join('. ')}.`, lock, DRAW(lang)].filter(Boolean).join(' '), keepBlockers: true };
+    if (tags.length) return { text: [`${tags.join('. ')}.`, lock].filter(Boolean).join(' '), keepBlockers: true };
     if (blockers.length) {
       const names = blockers.map(stripOwn);
-      return { text: `${say(lang, P, 'anyone without the repellant (Operator 5)', { 'pt-BR': `Qualquer jogador que não tenha ${joinWith(names, 'nem')}.`, en: `Any player who does not own ${joinWith(names, 'or')}.` })} ${DRAW(lang)}`, keepBlockers: false };
+      return { text: `${say(lang, P, 'anyone without the repellant (Operator 5)', { 'pt-BR': `Qualquer jogador que não tenha ${joinWith(names, 'nem')}.`, en: `Any player who does not own ${joinWith(names, 'or')}.` })}`, keepBlockers: false };
     }
-    if (lock) return { text: `${say(lang, P, 'anyone unless story in progress (chev_ tag, Operator 5)', { 'pt-BR': 'Qualquer jogador, menos enquanto esta história estiver em andamento.', en: 'Any player, except while this story is in progress.' })} ${DRAW(lang)}`, keepBlockers: false };
-    return { text: `${say(lang, P, 'no condition', { 'pt-BR': 'Sem condição: vale para qualquer jogador.', en: 'No condition: any player.' })} ${DRAW(lang)}`, keepBlockers: false };
+    if (lock) return { text: `${say(lang, P, 'anyone unless story in progress (chev_ tag, Operator 5)', { 'pt-BR': 'Qualquer jogador, menos enquanto esta história estiver em andamento.', en: 'Any player, except while this story is in progress.' })}`, keepBlockers: false };
+    return { text: `${say(lang, P, 'no condition', { 'pt-BR': 'Sem condição: vale para qualquer jogador.', en: 'No condition: any player.' })}`, keepBlockers: false };
   }
 
   function chainNote(lang, e, c) {
@@ -337,5 +337,5 @@ module.exports = function (h) {
     return out.map(t => `<p class="muted">${t}</p>`).join('');
   }
 
-  return { when, chainNote, verdicts, sameName, textNote };
+  return { when, chainNote, verdicts, sameName, textNote, drawNote: DRAW };
 };

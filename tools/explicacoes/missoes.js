@@ -57,8 +57,8 @@ module.exports = function (h) {
     if (bare && reason === 'none') {
       const tail = { 'pt-BR': roleLink ? ` Ela faz parte do ritual do papel ${roleLink}: veja a página do papel.` : '', en: roleLink ? ` It is part of the ${roleLink} role's ritual: see the role page.` : '' };
       return heavy
-        ? { 'pt-BR': `Não dá pontos, Dinheiro nem outra recompensa nos dados do jogo, e o custo em atributos é pesado.${tail['pt-BR']} ${heavyNote['pt-BR']}`, en: `It gives no points, Cash or other reward in the game data, and the attribute cost is heavy.${tail.en} ${heavyNote.en}` }
-        : { 'pt-BR': `Não dá pontos, Dinheiro nem outra recompensa nos dados do jogo.${tail['pt-BR']}`, en: `It gives no points, Cash or other reward in the game data.${tail.en}` };
+        ? { 'pt-BR': `Não dá pontos, Dinheiro nem outra recompensa, e o custo em atributos é pesado.${tail['pt-BR']} ${heavyNote['pt-BR']}`, en: `It gives no points, Cash or other reward, and the attribute cost is heavy.${tail.en} ${heavyNote.en}` }
+        : { 'pt-BR': `Não dá pontos, Dinheiro nem outra recompensa.${tail['pt-BR']}`, en: `It gives no points, Cash or other reward.${tail.en}` };
     }
     if (gapGroups.length && !heavy && reason === 'points-good') {
       return { 'pt-BR': 'Os pontos por Tempo estão acima da média, mas só no Tempo contado: some o que ficou de fora antes de aceitar.', en: 'Its points per Time are above average, but only for the Time counted: add up what was left out before accepting.' };
@@ -110,7 +110,7 @@ module.exports = function (h) {
     if (n < 2) return '';
     const text = kind === 'events'
       ? { 'pt-BR': `O jogo tem ${n} eventos com o nome “${name}”. Cada um é um evento separado do jogo; esta página mostra só um deles.`, en: `The game has ${n} events named “${name}”. Each one is a separate event in the game; this page shows only one of them.` }
-      : { 'pt-BR': `O jogo tem ${n} Missões com o nome “${name}”. Cada uma é um registro separado do jogo; esta página mostra só uma delas.`, en: `The game has ${n} quests named “${name}”. Each one is a separate entry in the game; this page shows only one of them.` };
+      : { 'pt-BR': `O jogo tem ${n} Missões com o nome “${name}”. Cada uma é uma Missão separada; esta página mostra só uma delas.`, en: `The game has ${n} quests named “${name}”. Each one is a separate quest; this page shows only one of them.` };
     return `<p class="muted">${say(lang, kind, `same name (${kind} with equal titles)`, text)}</p>`;
   }
 
@@ -120,8 +120,8 @@ module.exports = function (h) {
     const twin = all.find(x => x !== q && h.titleText(lang, x) === h.titleText(lang, q) && h.stepsOf(x).some(s => (s.Objectives || []).length));
     if (!twin) return '';
     return `<p class="muted">${say(lang, 'quests', 'empty quest entry with a twin of the same name', {
-      'pt-BR': `Este registro vem sem objetivos nem recompensas nos dados do jogo. A Missão de mesmo nome que traz os objetivos é ${h.link(lang, twin, h.title(lang, twin))}.`,
-      en: `This entry comes without objectives or rewards in the game data. The quest of the same name that has the objectives is ${h.link(lang, twin, h.title(lang, twin))}.`,
+      'pt-BR': `Esta versão da Missão não tem objetivos nem recompensas. A Missão de mesmo nome que traz os objetivos é ${h.link(lang, twin, h.title(lang, twin))}.`,
+      en: `This version of the quest has no objectives or rewards. The quest of the same name that has the objectives is ${h.link(lang, twin, h.title(lang, twin))}.`,
     })}</p>`;
   }
 

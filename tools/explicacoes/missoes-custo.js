@@ -130,10 +130,10 @@ module.exports = function (h) {
 
   // ---------------------------------------------------------------- Como começar sem origem conhecida
   const unknownStart = lang => say(lang, 'quests', 'start source unknown (no room, draw or role found)', {
-    'pt-BR': 'Não sabemos como esta Missão começa. Nenhuma ação em prédio, sorteio ou papel que conseguimos ler a entrega, o que não prova que ela não apareça no jogo.',
-    en: 'We do not know how this quest starts. No building action, draw or role we could read hands it out, which does not prove it never appears in the game.',
+    'pt-BR': 'Desconhecido.',
+    en: 'Unknown.',
   });
-  const unknownFee = lang => say(lang, 'quests', 'start cost unknown (start source unknown)', { 'pt-BR': 'A conta não inclui o custo de começar, que não conhecemos.', en: 'The count leaves out the cost of starting it, which we do not know.' });
+  const unknownFee = lang => say(lang, 'quests', 'start cost unknown (start source unknown)', { 'pt-BR': 'A conta não inclui o custo de começar, que é desconhecido.', en: 'The count leaves out the cost of starting it, which is unknown.' });
   const kaijuStart = lang => say(lang, 'quests', 'kaiju quest start (Global-Event-Kaiju-Battle-Trait, Kaiju-Battle-Add-Posters-*)', {
     'pt-BR': `A ação de aceitar é acrescentada pelo <a href="/${h.langDir(lang)}/guides/global-events/">Evento Global Batalha de Kaijus</a>: é durante ele que você a encontra.`,
     en: `The accept action is added by the <a href="/${h.langDir(lang)}/guides/global-events/">Kaiju Battle Global Event</a>: that is when you find it.`,
@@ -173,8 +173,8 @@ module.exports = function (h) {
     while ((wear + ring.loss * blocks) / spent * 100 <= jobWear && blocks < 50) blocks++;
     const name = h.link(lang, ring.item, h.title(lang, ring.item));
     return {
-      'pt-BR': `Os pontos parecem bons, mas falta somar ${name}: enquanto ele está com você, cada quadra tira ${number(lang, ring.each)} de Felicidade, de Saúde e de Higiene (${number(lang, ring.loss)} no total). Não sabemos quantas quadras separam os dois lugares no seu mapa. Com ${number(lang, blocks)} ou mais, o desgaste por Tempo já passa o de um emprego mediano.`,
-      en: `The points look good, but ${name} still has to be added: while you carry it, each block takes ${number(lang, ring.each)} Happiness, Health and Hygiene (${number(lang, ring.loss)} in total). We do not know how many blocks separate the two places on your map. With ${number(lang, blocks)} or more, the wear per Time already passes a median job's.`,
+      'pt-BR': `Os pontos parecem bons, mas falta somar ${name}: enquanto ele está com você, cada quadra tira ${number(lang, ring.each)} de Felicidade, de Saúde e de Higiene (${number(lang, ring.loss)} no total). O número de quadras entre os dois lugares depende do seu mapa. Com ${number(lang, blocks)} ou mais, o desgaste por Tempo já passa o de um emprego mediano.`,
+      en: `The points look good, but ${name} still has to be added: while you carry it, each block takes ${number(lang, ring.each)} Happiness, Health and Hygiene (${number(lang, ring.loss)} in total). The number of blocks between the two places depends on your map. With ${number(lang, blocks)} or more, the wear per Time already passes a median job's.`,
     };
   }
 
