@@ -1,0 +1,51 @@
+/* Suggestions channel. Only published when tools/sugestoes.js is switched on. */
+.sug-lock { overflow: hidden; scrollbar-gutter: stable; }
+.sug-foot { display: inline-flex; align-items: center; min-height: 44px; padding: 0; font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.sug-btn { font: inherit; font-weight: 700; cursor: pointer; }
+.sug-btn:disabled { opacity: .6; cursor: progress; transform: none; }
+
+.sug-modal { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.sug-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+.sug-panel { position: relative; width: 100%; max-width: 520px; max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain; padding: 16px 20px 20px; background-color: var(--vidro-flutuante); -webkit-backdrop-filter: var(--blur-flutuante); backdrop-filter: var(--blur-flutuante); border: 1px solid var(--vidro-flutuante-borda); border-radius: var(--raio-card); box-shadow: 0 16px 48px rgba(0,0,0,.32); }
+.sug-panel:focus { outline: none; }
+.sug-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.sug-head h2 { margin: 0; font-size: 1.25rem; letter-spacing: -.01em; }
+.sug-head .iconbtn { margin-right: -10px; flex: none; }
+.sug-form { display: grid; gap: 14px; }
+
+.sug-types { display: flex; flex-wrap: wrap; gap: 8px; min-inline-size: 0; margin: 0; padding: 0; border: 0; }
+.sug-types legend, .sug-field > span, .sug-where > span:first-child { padding: 0; font-size: .8125rem; font-weight: 600; color: var(--sec); }
+.sug-types legend { margin-bottom: 6px; }
+.sug-chip { position: relative; display: inline-flex; cursor: pointer; }
+.sug-chip input { position: absolute; width: 1px; height: 1px; min-height: 0; margin: 0; padding: 0; border: 0; opacity: 0; }
+.sug-chip span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; font-size: .875rem; font-weight: 600; color: var(--texto); background: var(--hover); border: 1px solid var(--vidro-card-borda); border-radius: var(--raio-pilula); transition: background-color .16s var(--curva), color .16s var(--curva), border-color .16s var(--curva); }
+.sug-chip:hover span { background: var(--hover-forte); }
+.sug-chip input:checked + span { background: var(--forte); border-color: var(--forte); color: var(--sobre-forte); }
+.sug-chip input:focus-visible + span { outline: 2px solid var(--detalhe); outline-offset: 2px; }
+
+.sug-field { display: grid; gap: 6px; }
+.sug-field small { font-size: .75rem; color: var(--sec); }
+/* 1rem keeps iOS from zooming the page when a field gets focus. */
+.sug-field input, .sug-field textarea { font-size: 1rem; }
+.sug-field textarea { display: block; width: 100%; min-height: 120px; padding: 10px 14px; font-family: inherit; line-height: 1.5; color: var(--texto); background: var(--hover); border: 1px solid var(--vidro-card-borda); border-radius: var(--raio-peq); resize: vertical; }
+.sug-field textarea::placeholder { color: var(--sec); opacity: 1; }
+.sug-where { display: flex; flex-wrap: wrap; gap: 2px 8px; margin: 0; font-size: .8125rem; color: var(--sec); }
+.sug-url { min-width: 0; overflow-wrap: anywhere; }
+.sug-error { margin: 0; font-size: .875rem; font-weight: 600; color: var(--rosa); }
+.sug-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.sug-done p { margin: 4px 0 16px; font-size: 1rem; }
+
+@media (max-width: 600px) {
+  .sug-modal { align-items: flex-end; padding: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+  .sug-panel { max-height: calc(100vh - 16px); max-height: calc(100dvh - 16px); padding: 12px 16px 16px; }
+  .sug-actions .btn { flex: 1 1 auto; justify-content: center; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sug-scrim { animation: sug-fade .18s var(--curva) backwards; }
+  .sug-panel { animation: sug-rise .24s var(--curva) backwards; }
+  @keyframes sug-fade { from { opacity: 0; } }
+  @keyframes sug-rise { from { opacity: 0; transform: translateY(12px); } }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .sug-panel { background: var(--solido-menu); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+dist.next/
+build/
+# Dados e artes extraídos do jogo: pertencem à Porcelain Fortress e são regenerados com tools/extract.js
+data/
+*.log
+.wrangler/

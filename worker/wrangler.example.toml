@@ -1,0 +1,34 @@
+# SOMENTE EXEMPLO. Não é usado por nenhum deploy. Valores entre < > são marcadores.
+# Passo a passo e como isso entra no Worker atual: docs/sugestoes.md.
+# Os caminhos são relativos a este arquivo. Se copiar para outra pasta, ajuste main e directory.
+
+name = "<NOME_DO_WORKER>"
+main = "index.mjs"
+compatibility_date = "<AAAA-MM-DD>"
+
+[assets]
+directory = "../dist"
+binding = "ASSETS"
+# Só /api/* passa pelo Worker. O resto vai direto aos arquivos estáticos.
+run_worker_first = ["/api/*"]
+
+[[d1_databases]]
+binding = "SUGESTOES_DB"
+database_name = "<NOME_DO_BANCO>"
+database_id = "<ID_DO_BANCO>"
+
+# Limite por IP: 5 envios a cada 60 s. O período só pode ser 10 ou 60.
+[[ratelimits]]
+name = "SUGESTOES_LIMITE"
+namespace_id = "<NUMERO_UNICO_NA_CONTA>"
+
+  [ratelimits.simple]
+  limit = 5
+  period = 60
+
+# Segredos: nunca aqui. Crie com "wrangler secret put":
+#   TURNSTILE_SECRET_KEY
+#   SUGESTOES_IP_SECRET
+
+# Só para desenvolvimento local, em worker/.dev.vars. Nunca em produção:
+#   SUGESTOES_DEV_SEM_PROTECAO=1
