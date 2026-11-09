@@ -94,6 +94,7 @@ function resolveTerm(term) {
 function rich(text) {
   const clean = text
     .replace(/<sprite[^>]*>/gi, '')
+    .replace(/<br\s*\/?>/gi, ' ')
     .replace(/<\/?(color|size|font|style|link|mark|u|s|sup|sub|align|voffset|nobr|cspace|line-height|indent|pos|margin|gradient|alpha|smallcaps|uppercase|lowercase)(=[^>]*)?>/gi, '')
     .trim();
   return esc(clean).replace(/&lt;(\/?)(i|b)&gt;/gi, '<$1$2>').replace(/\n/g, '<br>');
@@ -2090,7 +2091,7 @@ fs.copyFileSync(path.join(__dirname, 'assets', 'favicon.ico'), path.join(DIST, '
 SUG.copyAssets(DIST);
 
 // Modificadores: tools/explicacoes/modificadores.js.
-const MOD = require('./explicacoes/modificadores.js')({ RAW, byRef, byId, tx, spanLang, title, titleText, link, esc, plain, number, ui, hubText, say, page, crumbs, callout, howBlock, chipBar, goCell, GO_TH, articleLayout, ficha, fact, langDir, flavor, effects, simpleTable, roles, items, locations, assignSlugs, hasText, hubHead });
+const MOD = require('./explicacoes/modificadores.js')({ RAW, byRef, byId, tx, spanLang, title, titleText, link, esc, plain, number, ui, hubText, say, page, crumbs, callout, howBlock, chipBar, goCell, GO_TH, articleLayout, ficha, fact, langDir, flavor, effects, simpleTable, roles, items, locations, assignSlugs, hasText, hubHead, placeIn });
 for (const { code: lang, dir } of LANGS) {
   homePage(lang);
   itemsIndex(lang);

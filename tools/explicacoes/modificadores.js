@@ -6,7 +6,7 @@
 // O número de cada efeito vem do dado (traço e efeito), não de texto do jogo; o que não deu para confirmar sai rotulado como texto do jogo.
 
 module.exports = function (h) {
-  const { RAW, byRef, byId, tx, spanLang, title, titleText, link, esc, plain, number, ui, hubText, say, page, crumbs, callout, howBlock, chipBar, goCell, GO_TH, articleLayout, ficha, fact, langDir, flavor, effects, simpleTable, roles, items, locations, assignSlugs, hasText } = h;
+  const { RAW, byRef, byId, tx, spanLang, title, titleText, link, esc, plain, number, ui, hubText, say, page, crumbs, callout, howBlock, chipBar, goCell, GO_TH, articleLayout, ficha, fact, langDir, flavor, effects, simpleTable, roles, items, locations, assignSlugs, hasText, placeIn } = h;
   const PAGE = 'modifiers';
   const deref = v => (v && v.id ? byRef.get(v.id) : null);
   const modifiers = assignSlugs([...RAW['Gameplay.Modifiers.ModifierData']].filter(hasText));
@@ -84,12 +84,12 @@ module.exports = function (h) {
     }
     if (name === 'Vagrant') {
       const park = placeOf(lang, 'Garden City');
-      return { tier: 'setup', html: `<p>${s('GameStartModifiers home Outside (ModifierManager.ApplyGameStartRewards)', `Você começa a partida morando na rua, em ${park}: sem apartamento e sem aluguel a pagar até alugar um lugar.`, `You start the match living Outside, at ${park}: no apartment, and no rent to pay until you rent a place.`)}</p>`,
+      return { tier: 'setup', html: `<p>${s('GameStartModifiers home Outside (ModifierManager.ApplyGameStartRewards)', `Você começa a partida morando na rua, ${placeIn(lang, 'Garden City')}: sem apartamento e sem aluguel a pagar até alugar um lugar.`, `You start the match living Outside, at ${park}: no apartment, and no rent to pay until you rent a place.`)}</p>`,
         pick: pick('vagrant', 'Escolha para começar mais pobre, sem casa e tendo que arrumar uma.', 'Pick it to start poorer, without a home and needing to find one.') };
     }
     if (name === 'Dad Owns a Dealership') {
       const it = byId.get(m.GameStartModifiers.RewardEntries[0].Id);
-      return { tier: 'numbers', html: `<p>${s('GameStartModifiers item Vexmobile (ModifierManager.ApplyItemReward, Vexmobile-Modifier)', `Cada jogador começa com um ${link(lang, it, title(lang, it))}: andar custa 16 de Tempo por quadra, em vez de 20 a pé.`, `Each player starts with a ${link(lang, it, title(lang, it))}: moving costs 16 Time per block instead of 20 on foot.`)}</p>`,
+      return { tier: 'setup', html: `<p>${s('GameStartModifiers item Vexmobile (ModifierManager.ApplyItemReward)', `Cada jogador começa a partida já com um ${link(lang, it, title(lang, it))}, o carro da Vexcorp, sem precisar comprar.`, `Each player starts the match already owning a ${link(lang, it, title(lang, it))}, the Vexcorp car, without having to buy it.`)}</p>`,
         pick: pick('car', 'Escolha para se locomover mais rápido desde a primeira rodada.', 'Pick it to get around faster from the first round.') };
     }
 
@@ -153,7 +153,7 @@ module.exports = function (h) {
         return { tier: 'numbers', html: `<p>${s('MultAttributeCostEveryXRoundsTraitEffect (Interval, Modifiers: value += value x (pct - 1) x floor(round / Interval))', `A cada ${number(lang, effect.Interval)} rodadas os custos destas ações do Grande Jogo sobem de novo: ${effect.Modifiers.map(row).join(', ')} em cima do valor original, por período. Ações: ${supportNames}.`, `Every ${number(lang, effect.Interval)} rounds the costs of these Big Game actions go up again: ${effect.Modifiers.map(row).join(', ')} on top of the original value, per period. Actions: ${supportNames}.`)}</p>`, pick: '' };
       }
       if (name === 'Police State') {
-        return { tier: 'numbers', html: `<p>${s('PvpCurfewSleepTraitEffect, PvpManager.RequestAlwaysOnCurfewPunish_RPC, CurfewPenalty 200', 'Toque de recolher o tempo todo: quem termina o turno sem usar a ação Dormir paga uma multa de 200 de Dinheiro.', 'A permanent curfew: if you end your turn without using the Sleep action you pay a 200 Cash fine.')}</p>`, pick: pick('police', 'Escolha para obrigar todos a voltar para casa no fim de cada turno.', 'Pick it to force everyone home at the end of each turn.') };
+        return { tier: 'numbers', html: `<p>${s('PvpCurfewSleepTraitEffect, PvpManager.RequestAlwaysOnCurfewPunish_RPC, CurfewPenalty 200', 'Toque de recolher o tempo todo: quem termina o turno sem usar a ação Dormir paga uma multa de 200 de Dinheiro, ou tudo o que tiver, se for menos.', 'A permanent curfew: if you end your turn without using the Sleep action you pay a 200 Cash fine, or all your Cash if you have less.')}</p>`, pick: pick('police', 'Escolha para obrigar todos a voltar para casa no fim de cada turno.', 'Pick it to force everyone home at the end of each turn.') };
       }
       if (name === 'Futurism') {
         const act = deref(effect.ChamberActions[0]);
@@ -165,12 +165,12 @@ module.exports = function (h) {
       }
       if (name === 'School Fundraiser') {
         const act = deref(effect.ChamberActions[0]), academy = placeOf(lang, 'Academy');
-        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Donate to the School, Academy Old 1 chamber)', `Acrescenta em ${academy} a ação`, `Adds at ${academy} the action`)} ${actionName(lang, act)}. ${s('donate effect', 'Cada doação muda assim:', 'Each donation changes:')}</p>${effects(lang, act.Rewards.RewardEntries.filter(e => e.Type === 10))}`, pick: '' };
+        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Donate to the School, Academy Old 1 chamber)', `Acrescenta ${placeIn(lang, 'Academy')} a ação`, `Adds at ${academy} the action`)} ${actionName(lang, act)}. ${s('donate effect', 'Cada doação muda assim:', 'Each donation changes:')}</p>${effects(lang, act.Rewards.RewardEntries.filter(e => e.Type === 10))}`, pick: '' };
       }
       if (name === 'Friendship Crates') {
         const buy = deref(effect.ChamberActions[0]);
         const park = placeOf(lang, 'Garden City');
-        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Buy Friendship Crate, Garden Pond chamber)', `Acrescenta em ${park} a ação`, `Adds at ${park} the action`)} ${actionName(lang, buy)}. ${s('crate cost', 'Cada compra custa:', 'Each purchase costs:')}</p>${effects(lang, buy.Rewards.RewardEntries.filter(e => e.Type === 10))}<p>${s('FriendshipCrateGiveReportTraitEffect (OnRoundStarted, PickRecipient)', 'Na rodada seguinte, outro jogador recebe uma recompensa sorteada dessa caixa.', 'On the next round, another player receives a random reward from the crate.')}</p>`, pick: '' };
+        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Buy Friendship Crate, Garden Pond chamber)', `Acrescenta ${placeIn(lang, 'Garden City')} a ação`, `Adds at ${park} the action`)} ${actionName(lang, buy)}. ${s('crate cost', 'Cada compra custa:', 'Each purchase costs:')}</p>${effects(lang, buy.Rewards.RewardEntries.filter(e => e.Type === 10))}<p>${s('FriendshipCrateGiveReportTraitEffect (OnRoundStarted, PickRecipient)', 'Na rodada seguinte, outro jogador recebe uma recompensa sorteada dessa caixa.', 'On the next round, another player receives a random reward from the crate.')}</p>`, pick: '' };
       }
     }
 
