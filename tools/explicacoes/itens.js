@@ -620,6 +620,7 @@ module.exports = function criar(getCtx) {
     const pawn = c.pawnPlace(lang);
     const P = (id, pt, en) => K.s(id, pt, en);
     const slug = nm => K.item(nm);
+    if (!K.origin && it.ItemGroup === 5 && it.ItemSubGroup === 10) return P('worth not in use (ItemGroup NotInUse, GetPawnRewardsForItem)', `Não conte com ele: está fora de uso. Se aparecer na sua mochila, rende ${n(sell)} na ${pawn}.`, `Do not count on it: it is out of use. If it ever lands in your inventory, it fetches ${n(sell)} at the ${pawn}.`);
     // roupas
     if (it.ItemSubGroup === 5 && it.Tier > 0 && sc) {
       const outfits = c.items.filter(i => i.ItemSubGroup === 5 && i.Tier > 0).sort((a, b) => a.Tier - b.Tier);
@@ -741,7 +742,7 @@ module.exports = function criar(getCtx) {
     }
     // item de missão
     if (it.ItemSubGroup !== 8 && sell === 0) return P('worth no sale value (SellValue 0)', `A venda na ${pawn} não rende nada.`, `Selling it at the ${pawn} pays nothing.`);
-    if (it.ItemSubGroup === 8 && !K.origin && !(c.consume.get(it._id) || new Set()).size) return P('worth quest item nobody uses (no source and no consumer found)', 'Não tem valor de venda. Está na categoria de itens de Missão, mas não se sabe qual Missão o usa.', 'It has no sale value. It is in the quest item category, but which quest uses it is unknown.');
+    if (it.ItemSubGroup === 8 && !K.origin && !(c.consume.get(it._id) || new Set()).size) return P('worth quest item nobody uses (no reference in Quest or action tables)', 'Não tem valor de venda. Está na categoria de itens de Missão, mas nenhuma Missão das tabelas do jogo o usa.', 'It has no sale value. It is in the quest item category, but no quest in the game tables uses it.');
     if (it.ItemSubGroup === 8) return P('worth quest item (no SellValue)', `Não vale nada fora da missão: a venda não rende nada e ele não serve em outro lugar. Só interessa a quem está na missão.`, `It is worth nothing outside the quest: selling it pays nothing and it has no other use. It only matters while you are on the quest.`);
     // genérico
     return P('worth generic (SellValue)', `Rende ${n(sell)} na ${pawn}${sc ? ` e custa ${n(sc.cash)} para comprar` : ''}.`, `It pays ${n(sell)} at the ${pawn}${sc ? ` and costs ${n(sc.cash)} to buy` : ''}.`);
@@ -874,7 +875,7 @@ module.exports = function criar(getCtx) {
     }
     if (!sc && !spec && !cult && (c.startingGear.has(it._id) || !K.origin)) parts.push(c.startingGear.has(it._id)
       ? P('worth furniture given at start', `Não se compra, já vem com você${it.ScoreBonus ? `: rende ${n(it.ScoreBonus)} pontos` : ': não pontua'}. Qualquer cama melhor que você compre passa a valer no lugar dela ao dormir.`, `It cannot be bought, you start with it${it.ScoreBonus ? `: it gives ${n(it.ScoreBonus)} points` : ': it scores nothing'}. Any better bed you buy counts instead of it when sleeping.`)
-      : P('worth furniture no origin', `Sem fonte conhecida, não dá para planejar em cima dele.${it.ScoreBonus ? ` Se um dia aparecer, ele dá ${n(it.ScoreBonus)} pontos no fim da partida, ou ${n(it.SellValue)} de Dinheiro se for vendido.` : ''}`, `With no known source, you cannot plan around it.${it.ScoreBonus ? ` If it ever shows up, it gives ${n(it.ScoreBonus)} points at the end of the game, or ${n(it.SellValue)} Cash if sold.` : ''}`));
+      : P('worth furniture no origin', `Como nada nas tabelas do jogo entrega este móvel, não dá para planejar em cima dele.${it.ScoreBonus ? ` Se um dia aparecer, ele dá ${n(it.ScoreBonus)} pontos no fim da partida, ou ${n(it.SellValue)} de Dinheiro se for vendido.` : ''}`, `Since nothing in the game tables gives this furniture, you cannot plan around it.${it.ScoreBonus ? ` If it ever shows up, it gives ${n(it.ScoreBonus)} points at the end of the game, or ${n(it.SellValue)} Cash if sold.` : ''}`));
     const cursos = [...new Set(c.pointersTo(it).filter(p => p.cls === 'EducationData' && p.field === 'RequiredItems' && c.hasText(p.r)).map(p => c.titleText(K.lang, p.r)))];
     if (cursos.length) parts.push(P('worth furniture course need (EducationData.RequiredItems)', `Também é exigido por ${cursos.length === 1 ? '1 curso' : `${cursos.length} cursos`} (veja Para que serve), então quem pretende fazer esses cursos precisa dele de qualquer jeito.`, `It is also required by ${cursos.length === 1 ? '1 course' : `${cursos.length} courses`} (see What it is for), so anyone planning those courses needs it anyway.`));
     const group = sc && it.FurnitureSlot && !spec && !skipGroup ? furn.filter(i => i.FurnitureSlot === it.FurnitureSlot && i !== it && shopCost(K, i)) : [];
@@ -937,7 +938,7 @@ module.exports = function criar(getCtx) {
     if (obtainHtml.length) calls.push(c.callout(c.ui(lang, 'obtain'), `<ul class="plain">${[...new Set(obtainHtml)].slice(0, 16).join('')}</ul>`));
     else {
       const notas = require('./itens-sem-fonte')(K, it, { emLugar });
-      calls.push(c.callout(c.ui(lang, 'obtain'), notas ? notas.map(p => `<p>${p}</p>`).join('') : `<p>${K.s('origin unknown (no action, quest, event, role or shop gives it)', 'A origem deste item é desconhecida.', 'The origin of this item is unknown.')}</p>`));
+      calls.push(c.callout(c.ui(lang, 'obtain'), notas.map(p => `<p>${p}</p>`).join('')));
     }
 
     // Para que serve
@@ -1006,7 +1007,7 @@ module.exports = function criar(getCtx) {
     let w = worth(K, it);
     const abreComVenda = w && it.SellValue > 0 && w.startsWith(K.pt ? `Rende ${K.n(it.SellValue)} na ${pawn}` : `It pays ${K.n(it.SellValue)} at the ${pawn}`);
     const generico = abreComVenda && w === K.s('worth generic (SellValue)', `Rende ${K.n(it.SellValue)} na ${pawn}.`, `It pays ${K.n(it.SellValue)} at the ${pawn}.`);
-    if (it.SellValue > 0 && it.m_Name !== 'Friendship Crate') {
+    if (it.SellValue > 0 && it.m_Name !== 'Friendship Crate' && !(!K.origin && it.ItemGroup === 5 && it.ItemSubGroup === 10)) {
       const used = uses.length || it.Purpose === 6 || it.Purpose === 8 || it.Purpose === 4 || it.Purpose === 3 || it.Purpose === 7 || c.isStock(it) || it.ScoreBonus > 0 || [1].includes(it.Purpose) && ((it.Rewards || {}).RewardEntries || []).some(e => e.Type === 110);
       if (generico && !used) w = K.s('only sell (no pointer in game data, GetPawnRewardsForItem)', `Serve só para vender: rende ${K.n(it.SellValue)} na ${pawn}.`, `It is only good for selling: it fetches ${K.n(it.SellValue)} at the ${pawn}.`);
       if (!abreComVenda) calls.push(c.callout(c.ui(lang, 'sell'), `<p>${K.s(used ? 'sell value (GetPawnRewardsForItem)' : 'only sell (no pointer in game data, GetPawnRewardsForItem)', used ? `Na ${pawn}, rende ${K.n(it.SellValue)}.` : `Serve só para vender: rende ${K.n(it.SellValue)} na ${pawn}.`, used ? `At the ${pawn}, it fetches ${K.n(it.SellValue)}.` : `It is only good for selling: it fetches ${K.n(it.SellValue)} at the ${pawn}.`)}</p>`));

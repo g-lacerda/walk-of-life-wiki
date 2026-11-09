@@ -1,6 +1,6 @@
 'use strict';
-// Itens cuja origem não foi encontrada. Cada frase cita o dado ou o método conferido (docs/engenharia-reversa.md, "Ausência não é prova").
-// Regra: nunca dizer que o item não existe; dizer o que os dados mostram e que a fonte é desconhecida.
+// Itens que nenhuma ação, Missão, evento, papel ou loja entrega. Cada frase cita o dado ou o método conferido (docs/engenharia-reversa.md, "Ausência não é prova").
+// Regra: dizer o que as tabelas mostram e o que isso muda para quem joga. Só afirmar "fora de uso" com ItemGroup e ItemSubGroup NotInUse (5 e 10).
 const PORCENTO_MINERIO = { Kernite: 8, Omber: 18, Scordite: 32, Veldspar: 42 }; // ChamberActionData "Go Mining".WeightedRewards, soma dos pesos 100
 
 function premios(K) {
@@ -12,22 +12,27 @@ function premios(K) {
 module.exports = function notas(K, it, { emLugar }) {
   const s = (id, pt, en) => K.s(id, pt, en);
   const nome = it.m_Name;
-  const origem = () => s('origin unknown (no reward, action or code path gives it)', 'A origem deste item é desconhecida.', 'The origin of this item is unknown.');
+  const foraDeUso = () => s('not in use: ItemGroup and ItemSubGroup NotInUse, no reward in any table', 'Este item está fora de uso na versão atual. Os dados do jogo o marcam como fora de uso, e nenhuma ação, Missão, evento, papel ou loja das tabelas do jogo o entrega. Não conte com ele numa partida normal.', 'This item is out of use in the current version. The game data mark it as not in use, and no action, quest, event, role or shop in the game tables gives it. Do not count on it in a normal game.');
+  const semEntrega = () => s('no table gives it (raw references checked across all tables)', 'Nenhuma ação, Missão, evento, papel ou loja das tabelas do jogo entrega este item. Por isso, não conte com ele ao planejar a partida.', 'No action, quest, event, role or shop in the game tables gives this item, so do not count on it when planning your game.');
+  if (/^Junk \d+$/.test(nome)) return [
+    foraDeUso(),
+    s('junk: no RequiredItems reference, ScoreBonus 0', 'É uma tralha sem uso: nenhuma ação a consome e ela não dá pontos no fim da partida.', 'It is junk with no use: no action consumes it and it gives no points at the end of the game.'),
+  ];
   if (nome === 'Mining Laser') return [
-    s('origin unknown: Buy Mining Laser has no room', 'A origem deste item é desconhecida. A ação Comprar Laser de Mineração custa 50 de Tempo e 100 de Dinheiro, mas o lugar em que ela aparece é desconhecido.', 'The origin of this item is unknown. The Buy Mining Laser action costs 50 Time and 100 Cash, but where it appears is unknown.'),
+    s('not in use: Mining Laser and Buy Mining Laser (ChamberGroup NotInUse)', 'Este item está fora de uso na versão atual. Os dados do jogo marcam como fora de uso tanto ele quanto a ação Comprar Laser de Mineração (50 de Tempo e 100 de Dinheiro), a única que o entrega. Não conte com ele numa partida normal.', 'This item is out of use in the current version. The game data mark both it and the Buy Mining Laser action (50 Time and 100 Cash), the only one that gives it, as not in use. Do not count on it in a normal game.'),
   ];
   if (PORCENTO_MINERIO[nome]) return [
-    s(`source: Go Mining WeightedRewards (${nome})`, `Sai da ação Minerar, na sala Áreas Comuns (100 de Tempo, ${PORCENTO_MINERIO[nome]}% de chance). Essa ação só é acrescentada por quem tem o Laser de Mineração. A origem do laser e o lugar dessa sala no mapa são desconhecidos.`, `It comes from the Go Mining action in the Commons room (100 Time, ${PORCENTO_MINERIO[nome]}% chance). Only owning the Mining Laser adds that action. Where the laser comes from and where that room is on the map are unknown.`),
+    s(`not in use: ${nome}, Go Mining WeightedRewards (ChamberGroup NotInUse)`, `Só sai da ação Minerar (100 de Tempo, ${PORCENTO_MINERIO[nome]}% de chance). Os dados do jogo marcam como fora de uso este minério, a ação e o Laser de Mineração que a libera. Não conte com ele numa partida normal.`, `It only comes from the Go Mining action (100 Time, ${PORCENTO_MINERIO[nome]}% chance). The game data mark this ore, the action and the Mining Laser that unlocks it as not in use. Do not count on it in a normal game.`),
   ];
   if (nome === 'One Week Healthy Food') return [
-    s('origin unknown: Cleansing Food has no room', 'A origem deste item é desconhecida. A ação Comida Detox custa 25 de Tempo e 120 de Dinheiro, mas o lugar em que ela aparece é desconhecido.', 'The origin of this item is unknown. The Cleansing Food action costs 25 Time and 120 Cash, but where it appears is unknown.'),
+    s('not in use: One Week Healthy Food and Cleansing Food (ChamberGroup NotInUse)', 'Este item está fora de uso na versão atual. Os dados do jogo marcam como fora de uso tanto ele quanto a ação Comida Detox (25 de Tempo e 120 de Dinheiro), a única que o entrega. Não conte com ele numa partida normal.', 'This item is out of use in the current version. The game data mark both it and the Cleansing Food action (25 Time and 120 Cash), the only one that gives it, as not in use. Do not count on it in a normal game.'),
   ];
   if (nome === 'Dirty Money') return [
-    origem(),
-    s('use: Wash Dirty Money (RequiredItems, Can-Wash-Dirty-Cash in Scavenge-Level-01)', 'A ação Lavar Dinheiro Sujo exige 1 dele e dá 50 de Dinheiro por 50 de Tempo, na sala Áreas Comuns. O lugar dessa sala no mapa e o que libera a ação são desconhecidos.', 'The Wash Dirty Money action needs 1 of it and gives 50 Cash for 50 Time, in the Commons room. Where that room is on the map and what unlocks the action are unknown.'),
+    foraDeUso(),
+    s('use: Wash Dirty Money needs the item (RequiredItems), no table gives it', 'A ação Lavar Dinheiro Sujo continua nos dados: exige 1 dele e dá 50 de Dinheiro por 50 de Tempo. Sem o item, não há como usá-la.', 'The Wash Dirty Money action is still in the data: it needs 1 of it and gives 50 Cash for 50 Time. Without the item, there is no way to use it.'),
   ];
   if (nome === 'Lost Homework') return [
-    origem(),
+    foraDeUso(),
     s('use: HomeworkConditionalAddActionTraitEffect.EnteringChamber, EducationManager.ReturnHomework (2x EducationActionPerformed)', 'Com ele na mochila, a ação Devolver dever de casa perdido aparece nas salas de curso em que você tem um curso em andamento. Ela exige o item, custa 100 de Tempo e conta como 2 estudos no primeiro curso em andamento daquela sala, parando antes se o curso terminar.', 'While you carry it, the Return lost homework action appears in course rooms where you have a course in progress. It needs the item, costs 100 Time and counts as 2 study sessions in the first course in progress in that room, stopping early if the course finishes.'),
   ];
   if (nome === 'Box of Plagues') {
@@ -35,7 +40,8 @@ module.exports = function notas(K, it, { emLugar }) {
     const pawn = emLugar(K, lugar('Pawn Shop'));
     const mart = emLugar(K, lugar('Grocery Store'));
     return [
-      s('Cultist ritual steps: Quest-Cultist-Ritual-t*-31/32 (Pick up / Return box of plagues, -25 Time each)', `A origem deste item é desconhecida. Um ritual do Cultista tem duas etapas com o nome dele: pegar a Caixa de Pragas ${pawn} e entregá-la ${mart}, por 25 de Tempo cada.`, `The origin of this item is unknown. A Cultist ritual has two steps with its name: pick up the Box of Plagues at the ${pawn} and deliver it to ${mart}, for 25 Time each.`),
+      semEntrega(),
+      s('Cultist ritual steps: Quest-Cultist-Ritual-t*-31/32 (Pick up / Return box of plagues, -25 Time each), neither references the item', `Um ritual do Cultista tem duas etapas com o nome dele: pegar a Caixa de Pragas ${pawn} e entregá-la ${mart}, por 25 de Tempo cada. Essas etapas não exigem nem dão o item.`, `A Cultist ritual has two steps with its name: pick up the Box of Plagues at the ${pawn} and deliver it to ${mart}, for 25 Time each. Those steps neither need nor give the item.`),
     ];
   }
   if (nome === 'Friendship Crate') return Object.assign([
@@ -44,13 +50,15 @@ module.exports = function notas(K, it, { emLugar }) {
     premios(K),
   ], { confirmado: true });
   if (/^Pet (Conservative Sheep|Introverted Armadillo)$/.test(nome)) return [
-    s('origin unknown: no Buy Pet action (PetHandler.CalculateRandomPetsAvailableToBuy reads chamber actions)', 'A origem deste pet é desconhecida.', 'The origin of this pet is unknown.'),
+    s('no table sells this pet (PetHandler.CalculateRandomPetsAvailableToBuy reads chamber actions)', 'Nenhuma ação, Missão, evento, papel ou loja das tabelas do jogo entrega este pet. Por isso, não conte com ele ao planejar a partida.', 'No action, quest, event, role or shop in the game tables gives this pet, so do not count on it when planning your game.'),
   ];
   if (nome === 'Dinosaur Bone 2') return [
-    s('origin unknown, twin of Dinosaur Bone 1', `A origem deste osso é desconhecida. O osso que o Catador acha é outro item com o mesmo nome: ${K.item('Dinosaur Bone 1')}.`, `The origin of this bone is unknown. The bone the Scavenger finds is another item with the same name: ${K.item('Dinosaur Bone 1')}.`),
+    semEntrega(),
+    s('twin of Dinosaur Bone 1', `O osso que o Catador acha é outro item com o mesmo nome: ${K.item('Dinosaur Bone 1')}.`, `The bone the Scavenger finds is another item with the same name: ${K.item('Dinosaur Bone 1')}.`),
   ];
   if (nome === 'Piece of Diploma') return [
-    s('origin unknown, flavor says collect 3 (item_diploma_piece_flavor)', 'A origem deste item é desconhecida. O texto do jogo fala em juntar 3 pedaços para criar um Diploma, e não há ação conhecida que faça isso.', 'The origin of this item is unknown. The game text talks about putting 3 pieces together to make a Diploma, and no known action does that.'),
+    semEntrega(),
+    s('flavor says collect 3 (item_diploma_piece_flavor), no RequiredItems reference', 'O texto do jogo fala em juntar 3 pedaços para criar um Diploma, mas as tabelas não têm essa receita.', 'The game text talks about putting 3 pieces together to make a Diploma, but the tables have no such recipe.'),
   ];
-  return null;
+  return [semEntrega()];
 };

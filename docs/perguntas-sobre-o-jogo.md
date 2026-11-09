@@ -8,7 +8,8 @@ A fórmula de EXP do Aventureiro e os valores exatos do Workaholic ainda precisa
 
 De onde vêm estes itens, se é que vêm? Nada foi achado nos dados, prefabs ou código, mas isso não prova que faltem no jogo:
 
-- Enfeites e tralhas (`Junk 1` a `10`), segundo Osso de Dinossauro, Hamilton Dourado, Pedaço de Diploma (o texto fala em juntar 3), Maleta Misteriosa e Isca de Missão.
+- Segundo Osso de Dinossauro, Hamilton Dourado, Pedaço de Diploma (o texto fala em juntar 3), Maleta Misteriosa e Isca de Missão.
+- Fechado em 09/11/2026: `Junk 1` a `10`, Dinheiro Sujo, Dever de Casa Perdido, Laser de Mineração, os 4 minérios e Comida Detox têm `ItemGroup` 5 e `ItemSubGroup` 10 (`NotInUse`). As ações Minerar, Comprar Laser, Comida Detox e Devolver dever de casa têm `ChamberGroup` 5 (`NotInUse`). As tralhas não têm referência em nenhuma tabela nem asset, e os chamadores de `TryGetRandomDefaultItem` lidos no código passam transporte ou espaço de equipamento. As páginas dizem "fora de uso". Não testado em partida.
 - Ovelha Conservadora e Tatu Introvertido: aparecem à venda em alguma partida?
 - Laser de Mineração e minérios; Comida Detox; Dinheiro Sujo; Dever de Casa Perdido (e o que a devolução rende); Caixa de Pragas (entra na mochila no ritual do Cultista?).
 - Cadeira de Plástico, Segurança Tosca, Torradeira Dentada.

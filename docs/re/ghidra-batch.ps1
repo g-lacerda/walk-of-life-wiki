@@ -1,5 +1,5 @@
 # Decompiles every address in addrs-line.txt from the copy of GameAssembly.dll; no full analysis.
-$b = "C:\Users\Lacerda\AppData\Local\Temp\gh12"
+$b = "$env:TEMP\gh12"
 $list = (Get-Content "$PSScriptRoot\addrs-line.txt" -Raw).Trim() -split '\s+'
 Remove-Item "$b\proj\*" -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
 $jh = (Get-ChildItem "$b\jdk25" | Select-Object -First 1).FullName
