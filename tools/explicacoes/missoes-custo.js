@@ -123,8 +123,8 @@ module.exports = function (h) {
     const line = l => odds.map(g => (l === 'pt-BR' ? `${g.w} em ${g.total} (${perc(g)}%) em ${joinE(l, g.maps)}` : `${g.w} in ${g.total} (${perc(g)}%) on ${joinE(l, g.maps)}`)).join('; ');
     const noRepeat = b.action.WeightedRewardIsNeverSameInRow;
     return say(lang, 'quests', `board draw ${b.key} (WeightedRewards, FilterWeightedRewardsForCurrentMap, WeightedRewardIsNeverSameInRow)`, {
-      'pt-BR': `Sai no sorteio de Missões ${tier[0]} ${placeIn(lang, 'Vex Corp')}: você paga e o jogo escolhe uma da lista do seu mapa, sem deixar você escolher.${noRepeat ? ' A mesma Missão não sai duas vezes seguidas.' : ''} Chance desta: ${line('pt-BR')}.`,
-      en: `It comes from the ${tier[1]} quest draw at ${h.place(lang, 'Vex Corp')}: you pay and the game picks one from your map's list, and you do not get to choose.${noRepeat ? ' The same quest never comes up twice in a row.' : ''} Odds of this one: ${line('en')}.`,
+      'pt-BR': `Sai no sorteio de Missões ${tier[0]} ${placeIn(lang, 'Vex Corp')}: você paga e o jogo escolhe uma da lista do seu mapa, sem deixar você escolher.${noRepeat ? ' Depois que uma Missão sai, ela só volta quando as outras da lista também já tiverem saído.' : ''} Chance desta com a lista completa: ${line('pt-BR')}.`,
+      en: `It comes from the ${tier[1]} quest draw at ${h.place(lang, 'Vex Corp')}: you pay and the game picks one from your map's list, and you do not get to choose.${noRepeat ? ' Once a quest comes up, it only returns after the others on the list have come up too.' : ''} Odds of this one with the full list: ${line('en')}.`,
     });
   }
 

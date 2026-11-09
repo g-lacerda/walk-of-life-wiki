@@ -429,3 +429,6 @@ Cargos com `JobLevel` 11 a 16 (17): fechado por análise estática. `SetChamberD
 | Fome na carteira | `Forget Me Not`: ícone de Fome mostrado | `PlayerCard.SetFoodIcon` |
 | Toque de recolher (Police State) | Sem usar Dormir no turno: multa de `min(200, Dinheiro)` | `PvpCurfewSleepTraitEffect`, `PvpManager.RequestAlwaysOnCurfewPunish_RPC`, `PunishForBrokenCurfew`, `CurfewPenalty` 200 |
 | Grande Jogo mais caro | Cada ação de `SupportActions`: `valor + valor × (Percentage − 1) × piso(rodada / 4)` | `MultAttributeCostEveryXRoundsTraitEffect.CheckForChamberAction` `0x1807C0AD0`, `Mod-Mult-Big-Game-Prices` |
+
+
+Metrô: `Ticket Currency` tem `SubtractsValueOnActions` 0 e `AccumulativeValue` -1. A viagem exige saldo (`CanAffordModifiers`), mas não o consome (`ExecuteActionSuccess`); o saldo cai 1 por rodada. Bate com o texto do jogo, "Grants N round Metro Access".

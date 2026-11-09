@@ -178,7 +178,8 @@ module.exports = function (h) {
     const it = h.byId.get(entry.Id);
     if (!it) return '';
     const qty = entry.Value || 1;
-    const sell = (it.SellValue || 0) * qty;
+    // Comida (Purpose 6, Groceries) vai para a moradia; a Casa de Penhores só lista a mochila (PlayerState.GetAllSellableInventoryItemsFromInventory).
+    const sell = it.Purpose === 6 ? 0 : (it.SellValue || 0) * qty;
     const points = it.ItemGroup === 1 && it.ScoreBonus > 0 ? it.ScoreBonus : 0;
     if (!sell && !points) return '';
     const sellPt = sell ? `Vale ${h.number(lang, sell)}${qty > 1 ? ' no total' : ''} na Casa de Penhores` : '';
@@ -200,7 +201,7 @@ module.exports = function (h) {
 
   const SHOW_OUTCOMES = lang => say(lang, P, 'show outcomes option (ChoiceEventButtonContainer.SetData, GameRoomInfo.ChoiceEvents ShowResults)', {
     'pt-BR': 'Só dá para saber antes se a partida usar a opção Mostrar Consequências, em Eventos de Escolha, na personalização da partida: aí cada botão já mostra os números e os itens.',
-    en: 'You can only tell beforehand if the game uses the Show Consequences option, under Choice Events in the game customization: then each button already shows the numbers and items.',
+    en: 'You can only tell beforehand if the game uses the Show Outcomes option, under Choice Events in the game customization: then each button already shows the numbers and items.',
   });
 
   function twinNote(lang, e, family) {

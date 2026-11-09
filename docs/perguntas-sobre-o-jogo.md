@@ -120,4 +120,41 @@ Não publicado na tabela de loja, por falta de confirmação.
 | Futurism: teletransporte "em todo local" | Mesmo efeito com `Chambers` vazio; a página mostra só o custo da ação e o texto do jogo rotulado, pelo mesmo motivo acima | Confirmar em jogo |
 | Pawn Emporium: efeito na prateleira | `CheckForPawnShopSlots(tipo, ref n)` soma `AdditionalSpecialSlots` 2 e `SpecialFurnitureSlots` 6 ao tipo pedido. Sem ler o total exato de vagas de cada tipo. O texto do jogo diz que toda a mobília fica disponível | Confirmar em jogo quantos móveis aparecem |
 | Dificuldade Difícil e aluguel | `game_difficulty_hard_flavor` diz que o aluguel sobe a cada ciclo, mas `HardModifiers` não inclui Contrato Infernal (`IncreaseRentEveryPeriod`). O efeito também tem asset `Modify-Rent-Every-Period-Hard` | Ver se o texto é de antes da troca de dificuldade para listas de modificadores (`LegacyDifficultyTraits`) |
+| Pawn Emporium: a vaga normal | `PawnShopManager.UpdatePlayerPawnStore` chama `CheckForPawnShopSlots(false)` para móveis comuns e `(true)` para especiais; a página publica +2 e +6 nessa ordem. Não li o total de vagas | Conferir a prateleira em jogo |
+| Limited Employment: como a tela mostra | `JobHandler.CanApplyForJob` devolve falha pelo `CheckForJobAvailability`; não li a tela do emprego ocupado. A página diz só que a vaga fica indisponível | Ver como a vaga aparece em jogo |
 | Vexmobile: custo por quadra | `ItemData.Rewards` traz `Time` −16, e a tabela daqui diz 18/17/16 nos transportes; mas `Vexmobile-Modifier.AdditionalMoveCostList` tem `Time` × 0,7 (20 × 0,7 = 14) e `MovementSpeedModifier` 0,6. Os multiplicadores 0,9/0,8/0,7 não produzem 18/17/16 | Qual valor o jogo cobra. A página Dad Owns a Dealership não publica o número |
+
+## Dúvidas da verificação dos guias de base
+
+O texto dos guias não afirma estes pontos.
+
+| Dúvida | O que se sabe | O que falta |
+|---|---|---|
+| Os cursos de Estudos Curiosos aparecem sempre? | A sala `Academy Curious Studies` está em `LocationData/Academy.Chambers` e o departamento lista os 6 cursos. `RoleSchoolAndCoursesTraitEffect.OnEducationDepartmentEntered` só tira cursos da lista de quem tem o traço. Nenhum dado concede os traços `Add-Quest-Studies-*` nem `Role-Angler-Level-01` | Abrir a sala no jogo sem Missão ativa e ver quais cursos aparecem |
+| A Satisfação muda alguma regra? | `AttributeData/Fullness` não tem `ValueTriggers` nem acúmulo, e a fome olha `HasEatenInTurn`. Não dá para provar que nenhum código leia o número | Procurar efeito do número no jogo |
+
+Resolvido nesta verificação: os 8 cursos sem departamento (tipo 5) são sorteados em `EducationManager.PopulateLists`, 2 por sala em `Academy Old 1/2/3`, e pedem o diploma da sala (`TierOneRequirement`, `TierTwoRequirement` e `TierThreeRequirement` em `Level.prefab`).
+
+### Guias do mundo (verificação)
+
+- O bot tem alguma outra vantagem de informação além do resultado das escolhas de evento? Confirmado só o caso `BotChoicePicking.Always` (`BotHandler.HandleReports`, `TryPickBestChoiceIndex`). O guia deixou de dizer que é a única.
+- O número da Satisfação aparece na tela durante a partida? O atributo tem `HideProgressBar = 1` e não achei o elemento da interface. O guia diz só que a punição não lê esse número (`PlayerState.StartTurnForPlayer` lê `HasEatenInTurn`).
+
+
+## Itens, móveis e pets: dúvidas da verificação
+
+| Dúvida | O que se sabe | O que falta |
+|---|---|---|
+| Áreas Comuns: em que lugar fica | `Garden Commons` (termo `chamber_commons`) não está em `Chambers` de nenhum `LocationData` nem em `AddChamberTraitEffect`. Traços acrescentam nela Minerar, Lavar Dinheiro Sujo e o ritual do Cultista (`RitualStartPark`). O NPC dela é `Park Raccoons` | Se a sala aparece no mapa e onde. As páginas de Laser, minérios e Dinheiro Sujo dizem só "sala Áreas Comuns" |
+| Item com `SellValue` 0: dá para vender | `GetAllSellableItemsFromInventory` e `SetChamberDataForSellingRows` não filtram por `SellValue`; a recompensa seria 0 de Dinheiro. Não achei o filtro | Se o item aparece na venda da Casa de Penhores. As páginas dizem só que a venda não rende nada |
+| O Banjo soma vaga comum também | `CheckForPawnShopSlots(especial, ref n)` soma `[this+0x20+especial*4]`: `AdditionalSpecialSlots` 1 entra na contagem comum e `SpecialFurnitureSlots` 1 na especial | Confirmar em jogo se a prateleira mostra 2 comuns; a página fala só da vaga especial, que está certa |
+| EXP de Trabalho e pontuação | Existe `CoreData` `Experience Score` (`ScoreType` 100, ícone de EXP), mas a pontuação vem de recompensas `Type` 95 e `Experience` não está em `ScoringAttributes` | Se a EXP acumulada vale pontos no fim. A página de currículos não diz mais que ela "só serve" para subir de cargo |
+| Vexmobile: custo por quadra (resolvido) | `MovePlayerOnPath` monta o custo com `Rewards` do transporte equipado e `OnAttemptingMoveAction` multiplica o `Time`: 18 × 0,9, 17 × 0,8, 16 × 0,7 = 16, 14 e 11 | Nada. As páginas dos três transportes já usam 16, 14 e 11 |
+
+
+### Papéis (verificação das páginas)
+
+- **Terminar Ritual:** a ação tem traço (`CompleteRitualAtHomeTrait`) e Missão (`Quest-Cultist-Complete`), mas nenhuma cadeia de ritual usa essa Missão. Ela aparece em alguma situação? A página não cita mais a ação.
+- **Começar Ritual em casa e no Parque:** `Quest-Cultist-Ritual-Start-Home` e `-Park` existem fora das cadeias. A página lista só Clucker's, Academia e Banco, que são os locais usados nas cadeias.
+- **Lançar Maldição na Faculdade:** `Quest-Cultist-Ritual-t3-25` não está em cadeia, e o texto dela fala em Parque, enquanto o efeito aponta para a Faculdade.
+- **Interdição do Hacker pego:** o código cria o bloqueio com duração 3 e a constante `BustLockoutTurns` vale 1. Pela leitura de `TickLockedBuildings`, seriam 3 rodadas. Confirmar jogando quantas rodadas os lugares ficam fechados. A página diz "por um tempo".
