@@ -3,6 +3,7 @@
 // Usage: node tools/build-site.js [gameBuildId]
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { LANGS, ui, EXTRA_NAMES } = require('./i18n');
 const { hubText, guideTitles } = require('./hub-text');
 const SUG = require('./sugestoes-ui');
@@ -507,7 +508,11 @@ function siteTree(lang) {
 // ---------------------------------------------------------------- Page shell
 const CREDITS = require('./creditos.js')({ esc, langDir });
 let pageCount = 0;
+const inlineScriptHashes = new Set();
 function writePage(rel, html) {
+  if (rel.endsWith('.html')) for (const m of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+    if (!/\bsrc=/i.test(m[1]) && !/type="application\/(ld\+)?json"/i.test(m[1])) inlineScriptHashes.add(`'sha256-${crypto.createHash('sha256').update(m[2], 'utf8').digest('base64')}'`);
+  }
   const file = path.join(DIST, rel);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, html);
@@ -2127,11 +2132,25 @@ const urls = [''].concat(['items/', 'jobs/', 'locations/', 'quests/', 'events/',
 writePage('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${LANGS.flatMap(l => urls.map(u => `<url><loc>${SITE}/${l.dir}/${u}</loc></url>`)).join('')}</urlset>\n`);
 writePage('robots.txt', `User-agent: *\nAllow: /\nSitemap: ${SITE}/sitemap.xml\n`);
 
-// Cloudflare Pages picks these two up from the output root.
-writePage('_headers', `/assets/*\n  Cache-Control: public, max-age=86400\n\n/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n`);
 writePage('404.html', `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>404 · WOL Wiki</title><link rel="stylesheet" href="/assets/style.css"></head>
 <body><main><div class="wrap"><h1>404</h1><ul class="plain">${LANGS.map(l => `<li lang="${l.code}"><a href="/${l.dir}/">${ui(l.code, 'notFound')} · ${l.name}</a></li>`).join('')}</ul></div></main><footer>${CREDITS.footer('en')}</footer></body></html>`);
 
+// Written after every page, so the policy lists the hash of each inline script actually published.
+const TURNSTILE = require('./sugestoes').SUGGESTIONS_ENABLED ? ' https://challenges.cloudflare.com' : '';
+const CSP = [
+  "default-src 'self'",
+  `script-src 'self' ${[...inlineScriptHashes].sort().join(' ')}${TURNSTILE}`,
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com",
+  "img-src 'self'",
+  "connect-src 'self'",
+  `frame-src ${TURNSTILE ? TURNSTILE.trim() : "'none'"}`,
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join('; ');
+writePage('_headers', `/assets/*\n  Cache-Control: public, max-age=86400\n\n/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: DENY\n  Strict-Transport-Security: max-age=31536000\n  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()\n  Content-Security-Policy: ${CSP}\n`);
 fs.mkdirSync(path.join(ROOT, 'build'), { recursive: true });
 const unresolved = Object.keys(report.unresolved).sort();
 const fallbackTitles = Object.keys(report.fallbackTitles || {}).sort();
