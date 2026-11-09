@@ -439,3 +439,26 @@ Metrô: `Ticket Currency` tem `SubtractsValueOnActions` 0 e `AccumulativeValue` 
 - Box of Plagues: as ações `Cultist - Pick up box of plagues` (`Pawn Shop Buy Pawned`, `BiddingPlaguesPickup`) e `Cultist - Return box of plagues` (`Grocery Store Store`, `BiddingPlaguesDeliver`) são etapas de `Chain-Cultist-Ritual-t1-3`, `t2-3` e `t3-3` (`Quest-Cultist-Ritual-t*-31` e `-32`); cada uma tem `Rewards` -25 de Tempo e `RequiredItems` vazio. O item `Box of Plagues` não é citado por nenhum registro: a ligação com as ações é só o nome e o ícone. Página diz que a origem é desconhecida e lista as duas etapas.
 - Pets `Conservative Sheep` e `Introverted Armadillo`: `CalculateRandomPetsAvailableToBuy` monta as listas com `BuildingManager.GetAllActionRewardsInChamberForPlayer`, e `AddAllPetsToBuyable` (Pet Emporium) só soma essas listas; nenhuma ação tem estes pets como recompensa. Página diz só que a origem é desconhecida.
 - `Scavenge-Level-01` (traço que dá `Can-Wash-Dirty-Cash`) só é citado por `TraitStorage`, e `Garden Commons` (Áreas Comuns) segue fora de `Chambers` de qualquer `LocationData`; o traço e a sala continuam sem origem conhecida.
+
+
+### Artista: "Vale a pena?" (páginas dos 6 cargos)
+
+| Regra | Valor | Fonte |
+|---|---|---|
+| EXP e inspiração | Confirmado: a EXP de Trabalho também é multiplicada por 0,5 / 0,8 / 1,3. `GetWorkRewards` devolve `Reward.ToRewardInfoList` da recompensa inteira do cargo, sem filtro, e o laço de `CheckForWorkAction` só pula o atributo igual a `RealmData.ActionPointAttribute` (Tempo) e valor 0. Fecha a dúvida da linha "Artista: inspiração e custo". Arredondamento (`0x18059CDB0`) continua não lido, por isso a página diz "cerca de" | `JobHandler.GetWorkRewards`, `RoleArtistActionTrackerTraitEffect.CheckForWorkAction` `0x1807C6DC0`, `AuthActionHandlerForPlayerState.HandleInsideChamberState` (ISIL 450 a 470) |
+| Quadro terminado | O progresso soma 0,25 / 0,15 / 0,08 conforme o estado lido antes de gastar a inspiração; em 1 ou mais soma 1 em `PaintingCompletedCount`, sorteia a obra e o progresso volta a 0 (a sobra se perde). Sem mudar de estado: 4, 7 ou 13 turnos de trabalho | `Artist.ProgressPainting` (ISIL 082 a 098, 159 a 167, 302 a 308), `GetProgressForState` |
+| Inspiração por turno | Cada turno de trabalho tira 0,1 da inspiração do lugar; inspirado é acima de 0,8 (`seta`), então 0,8 já é neutro | `Artist.ProgressPainting` ISIL 117, `GetInspirationState` |
+| Missões do papel | `Quest-Artist-1` a `5`: `RoleArtistCompletePaintings` cumpre com `PaintingCompletedCount` maior ou igual a `Count` (4, 9, 15, 21, 28) e dão 150, 200, 250, 300 e 350 pontos (`Type` 95), 1.250 no total. O contador só é alterado em `ProgressPainting` (+1) e no carregamento do save, por isso não zera ao mudar de cargo | `RoleArtistCompletePaintings.CheckObjectiveStatus`, `Artist.set_PaintingCompletedCount`, `Gameplay.Quests.Quest` |
+| Venda do quadro | `GetPawnRewardsForItem` paga `SellValue` (não `ItemData.Rewards`). `Sell Pawn Item (P)` cobra 25 de Tempo. Valor médio por cargo = média ponderada de `Artist - Make Art Reward N.WeightedRewards` pelo `SellValue`: 198, 252, 322, 374, 440, 560 | `AuthActionHandlerForPlayerState.GetPawnRewardsForItem`, `ChamberActionData`, `ItemData` |
+| Contas da página | Pontos por 100 de Tempo = (1.250 ÷ 28 ÷ (turnos × 125) × 100) + (`Score` do próximo nível ÷ (turnos até subir com EXP × multiplicador × 125) × 100). Dinheiro por 100 de Tempo = venda média ÷ (turnos × 125 + 25) × 100, sem o caminho. Medianas: `missionRate`, `JOB_RATE`, `JOB_WEAR` de `tools/build-site.js` | `tools/explicacoes/empregos.js` `artistWorth` |
+| `Clothing Store 6` | `CanApplyForJob` recusa quando `GetClothesTier` (lê só o `Tier` da roupa vestida) é menor que `RequiredEquippedItemTier` 5; nenhuma roupa passa do nível 4; `JobLevel` 16 fica fora das abas 1 a 6. A página diz que não pode ser assumido e não comenta o salário | `JobHandler.CanApplyForJob` ISIL 262 a 273, `PlayerState.GetClothesTier`, `ItemData.Tier`, `SetChamberDataForType` |
+
+## Leitura das páginas curtas (modificadores que acrescentam ação)
+
+| Assunto | Regra | Fonte |
+|---|---|---|
+| Ação sem sala definida | `AddChamberActionTraitEffect` com `OncePerLocation` escolhe uma sala por local (`ResolveLocation`), sem filtro de local; `SkipEnteringPlayersHomeLocation` tira a moradia do jogador | `EnteringChamber` `0x18079F1B0`, `ResolveLocation` `0x18079F5C0` |
+| Serviço Comunitário | `Add-Clean-The-Trash-In-Park-Trait-Effect` tem `Chambers` vazio, `OncePerLocation` 1 e `SkipEnteringPlayersHomeLocation` 1: a ação aparece em todo local menos a moradia, apesar de o texto citar só o Parque | `AddChamberActionTraitEffect`, `ChamberActionData/Clean Up Trash` |
+| Futurismo | Mesmo caminho, sem pular a moradia (`Add-Teleporter-Everywhere`) | `AddChamberActionTraitEffect` |
+| Metas dos desafios | `ScaleTargetByPlayerCount` multiplica o alvo pelos jogadores humanos; `Aggregation` 1 soma o progresso do grupo. Bairro Exemplar 40 Recolher Lixo, Hora da Aventura 10 Caixas da Amizade, Salve a Educação 2.000 de Dinheiro na Faculdade | `ChallengeData.Objectives`, `ChallengeObjectiveEntry` (tooltips) |
+| Desafio | Modificadores fixos, o seletor não deixa o jogador editar | `ChallengeData.Modifiers` (tooltip) |

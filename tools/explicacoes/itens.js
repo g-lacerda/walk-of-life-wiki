@@ -741,6 +741,7 @@ module.exports = function criar(getCtx) {
     }
     // item de missão
     if (it.ItemSubGroup !== 8 && sell === 0) return P('worth no sale value (SellValue 0)', `A venda na ${pawn} não rende nada.`, `Selling it at the ${pawn} pays nothing.`);
+    if (it.ItemSubGroup === 8 && !K.origin && !(c.consume.get(it._id) || new Set()).size) return P('worth quest item nobody uses (no source and no consumer found)', 'Não tem valor de venda. Está na categoria de itens de Missão, mas não se sabe qual Missão o usa.', 'It has no sale value. It is in the quest item category, but which quest uses it is unknown.');
     if (it.ItemSubGroup === 8) return P('worth quest item (no SellValue)', `Não vale nada fora da missão: a venda não rende nada e ele não serve em outro lugar. Só interessa a quem está na missão.`, `It is worth nothing outside the quest: selling it pays nothing and it has no other use. It only matters while you are on the quest.`);
     // genérico
     return P('worth generic (SellValue)', `Rende ${n(sell)} na ${pawn}${sc ? ` e custa ${n(sc.cash)} para comprar` : ''}.`, `It pays ${n(sell)} at the ${pawn}${sc ? ` and costs ${n(sc.cash)} to buy` : ''}.`);
@@ -908,7 +909,7 @@ module.exports = function criar(getCtx) {
     const species = { dog: ['cachorro', 'dog'], cat: ['gato', 'cat'], chicken: ['galinha', 'chicken'], frog: ['sapo', 'frog'], bird: ['pássaro', 'bird'], snake: ['cobra', 'snake'], turtle: ['tartaruga', 'turtle'], rock: ['pedra', 'rock'], pig: ['porco', 'pig'], panda: ['panda-vermelho', 'red panda'] }[petKind(it)];
     if (it.Purpose === 7 && !shopActs(K.c, it).length) return '';
     if (it.Purpose === 7) return K.s('lead pet', `Um pet${species ? ` (${species[0]})` : ''} que você compra na Pet Shop.`, `A pet${species ? ` (${species[1]})` : ''} you buy at the Pet Shop.`);
-    if (it.ItemSubGroup === 8 && !(it.SellValue > 0)) return K.s('lead quest item', 'Item de missão: só serve dentro da missão.', 'Quest item: it only works inside the quest.');
+    if (it.ItemSubGroup === 8 && !(it.SellValue > 0) && K.origin) return K.s('lead quest item', 'Item de missão: só serve dentro da missão.', 'Quest item: it only works inside the quest.');
     if (it.Purpose === 4) return K.s('lead furniture', `Móvel${it.Tier ? ` de nível ${it.Tier}` : ''} para a sua casa.`, `Furniture${it.Tier ? ` of tier ${it.Tier}` : ''} for your home.`);
     return '';
   }

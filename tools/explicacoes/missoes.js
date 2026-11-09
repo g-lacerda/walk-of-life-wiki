@@ -111,7 +111,9 @@ module.exports = function (h) {
     const text = kind === 'events'
       ? { 'pt-BR': `O jogo tem ${n} eventos com o nome “${name}”. Cada um é um evento separado do jogo; esta página mostra só um deles.`, en: `The game has ${n} events named “${name}”. Each one is a separate event in the game; this page shows only one of them.` }
       : { 'pt-BR': `O jogo tem ${n} Missões com o nome “${name}”. Cada uma é uma Missão separada; esta página mostra só uma delas.`, en: `The game has ${n} quests named “${name}”. Each one is a separate quest; this page shows only one of them.` };
-    return `<p class="muted">${say(lang, kind, `same name (${kind} with equal titles)`, text)}</p>`;
+    const twin = kind === 'quests' && n === 2 && h.stepsOf(rec).some(s => (s.Objectives || []).length) ? all.find(x => x !== rec && h.titleText(lang, x) === name) : null;
+    const other = twin ? ` ${say(lang, kind, 'same name: link to the other record', { 'pt-BR': `A outra é ${h.link(lang, twin, h.title(lang, twin))}.`, en: `The other one is ${h.link(lang, twin, h.title(lang, twin))}.` })}` : '';
+    return `<p class="muted">${say(lang, kind, `same name (${kind} with equal titles)`, text)}${other}</p>`;
   }
 
   // Missão sem objetivo nenhum nos dados, mas com uma de mesmo nome que os tem.

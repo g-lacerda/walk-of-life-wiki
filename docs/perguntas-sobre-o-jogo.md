@@ -164,3 +164,13 @@ Resolvido nesta verificação: os 8 cursos sem departamento (tipo 5) são sortea
 - Mining Laser, minérios, Comida Detox, Dinheiro Sujo, Caixa de Pragas, Dinosaur Bone 2, Piece of Diploma, Ovelha e Tatu: a origem segue desconhecida. Não confirmamos em código nem dados, e as páginas dizem só "origem desconhecida".
 - O que a devolução de Dever de Casa Perdido rende foi resolvido: 2 estudos do curso em andamento na sala (`EducationManager.ReturnHomework`). Falta só a origem do item.
 - `Caixa de Pragas`: a ação de pegar não mexe no item pelos dados; o jogo pode entregar ou não o item por outro caminho. Confirmar jogando um ritual.
+
+## Leitura das páginas curtas
+
+- Item com `SellValue` 0 (porco de ouro, itens de Missão): a Casa de Penhores aceita o item por 0 ou recusa? A ficha agora diz "Sem valor de venda", sem afirmar uma coisa nem outra. Confirmar jogando.
+- `Tier` na ficha das Missões continua "Nível": o uso em código só foi lido para o Aventureiro, então a ficha não explica o número. Ver quem mais lê `QuestComponent.Tier`.
+- Quanto vale o `Cooldown` 2 com `LocationScopedCooldown` de Recolher Lixo (por local? por jogador?): não publicado. Importa para a meta de 40 usos do desafio Bairro Exemplar.
+
+## Artista: arredondamento dos custos e da EXP
+
+A função `0x18059CDB0`, chamada em `RoleArtistActionTrackerTraitEffect.CheckForWorkAction`, arredonda valor × multiplicador (0,5 / 0,8 / 1,3), mas não foi lida. Com EXP 3 e ×0,5 o turno pode dar 1 ou 2. Por isso o "Vale a pena?" dos cargos de Artista usa o valor sem arredondar e diz "cerca de". Só se confirma lendo a função ou jogando.

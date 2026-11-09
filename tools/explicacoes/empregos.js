@@ -80,6 +80,78 @@ module.exports = function (h) {
     return html;
   }
 
+  // Artista, "Vale a pena?". Fontes: Artist.GetProgressForState (0,25 / 0,15 / 0,08), Artist.GetAttributeCostMultiplier (1,3 / 0,8 / 0,5),
+  // Artist.ProgressPainting (ao chegar a 1 o progresso volta a 0 e PaintingCompletedCount soma 1), RoleArtistCompletePaintings (Count contra PaintingCompletedCount),
+  // ação Sell Pawn Item (P), JobHandler.GetWorkRewards e RoleArtistActionTrackerTraitEffect.CheckForWorkAction (EXP multiplicada).
+  const ART_STATES = [{ progress: 0.25, mult: 1.3 }, { progress: 0.15, mult: 0.8 }, { progress: 0.08, mult: 0.5 }];
+  function artistWorth(lang, j) {
+    const page = j.m_Name;
+    const time = -h.sumAttr(j.Rewards, 'Time');
+    const exp = h.sumAttr(j.Rewards, 'Experience');
+    const wear = ['Happy', 'Health', 'Hygiene'].reduce((sum, a) => sum - Math.min(0, h.sumAttr(j.Rewards, a)), 0);
+    const pool = (h.artistJobs.get(j._id).WeightedRewards || []).filter(w => w.Reward && w.Reward.RewardEntries.length);
+    const weight = pool.reduce((sum, w) => sum + w.Weight, 0);
+    const avgSale = Math.round(pool.reduce((sum, w) => sum + w.Weight * h.byId.get(w.Reward.RewardEntries[0].Id).SellValue, 0) / weight);
+    const sellAction = h.table('ChamberActionData').find(a => a.m_Name === 'Sell Pawn Item (P)');
+    const sellTime = -h.sumAttr(sellAction.Rewards, 'Time');
+    const chain = (h.deref(h.artistRole.RoleQuestChain).Quests || []).map(h.deref);
+    const goals = chain.map(q => Object.values(q.references || {})[0].Count);
+    const prizes = chain.map(q => q.Rewards.RewardEntries.filter(e => e.Type === 95).reduce((sum, e) => sum + e.Value, 0));
+    const lastGoal = goals[goals.length - 1];
+    const chainPoints = prizes.reduce((sum, p) => sum + p, 0);
+    const perPiece = chainPoints / lastGoal;
+    const list = (values, and) => values.slice(0, -1).map(v => n(lang, v)).join(', ') + ` ${and} ${n(lang, values[values.length - 1])}`;
+    const levels = h.table('ExperiencePointData');
+    const here = levels.find(x => x.Level === j.JobLevel), up = levels.find(x => x.Level === j.JobLevel + 1);
+    const states = ART_STATES.map(st => {
+      const shifts = Math.ceil(1 / st.progress);
+      const levelPoints = up && exp > 0 ? up.Score / (Math.ceil((up.Xp - here.Xp) / (exp * st.mult)) * time) * 100 : 0;
+      return {
+        shifts,
+        points: Math.round(perPiece / (shifts * time) * 100 + levelPoints),
+        cash: avgSale / (shifts * time + sellTime) * 100,
+        wear: Math.round(wear * st.mult * shifts),
+      };
+    });
+    const [ins, neu, low] = states;
+    const pawn = h.place(lang, 'Pawn Shop');
+    const roleLink = h.link(lang, h.artistRole, h.title(lang, h.artistRole));
+    const missionMedian = h.missionRate(), jobMedian = h.jobRate(), wearMedian = h.jobWear();
+    const parts = [];
+    parts.push(say(lang, page, 'artist points (RoleArtistCompletePaintings.Count, Quest.Rewards Type 95, ExperiencePointData.Score, Artist.PaintingCompletedCount)', {
+      'pt-BR': `<strong>Pontos, que decidem a partida:</strong> as Missões do papel ${roleLink} dão ${list(prizes, 'e')} pontos ao chegar a ${list(goals, 'e')} quadros terminados no total, ${n(lang, chainPoints)} pontos somados, cerca de ${n(lang, Math.round(perPiece))} por quadro. A contagem não zera quando o cargo muda.${up ? ` Cada turno de trabalho também dá EXP de Trabalho, e o próximo nível vale ${n(lang, up.Score)} pontos.` : ''} Somando Missões e EXP, pintar rende cerca de ${n(lang, ins.points)} pontos a cada 100 de Tempo em lugar inspirado, ${n(lang, neu.points)} em lugar neutro e ${n(lang, low.points)} em lugar sem inspiração, até o ${n(lang, lastGoal)}º quadro. Uma Missão mediana rende ${n(lang, missionMedian)}${ins.points < missionMedian ? ', e nem o melhor caso daqui chega a isso' : ''}.`,
+      en: `<strong>Points, which decide the game:</strong> the ${roleLink} role quests give ${list(prizes, 'and')} points on reaching ${list(goals, 'and')} finished pieces in total, ${n(lang, chainPoints)} points combined, about ${n(lang, Math.round(perPiece))} per piece. The count does not reset when the rank changes.${up ? ` Each shift also gives Work XP, and the next level is worth ${n(lang, up.Score)} points.` : ''} Adding quests and XP, painting gives about ${n(lang, ins.points)} points per 100 Time in an inspired place, ${n(lang, neu.points)} in a neutral place and ${n(lang, low.points)} in an uninspired place, up to piece number ${n(lang, lastGoal)}. A median quest gives ${n(lang, missionMedian)}${ins.points < missionMedian ? ', and even the best case here does not reach that' : ''}.`,
+    }));
+    const beats = neu.cash > jobMedian ? 'neutral' : ins.cash > jobMedian ? 'inspired' : 'none';
+    const moneyVerdict = {
+      neutral: { 'pt-BR': 'O quadro passa disso em lugar inspirado ou neutro, nunca sem inspiração.', en: 'A piece beats that in an inspired or neutral place, never in an uninspired one.' },
+      inspired: { 'pt-BR': 'O quadro só passa disso em lugar inspirado.', en: 'A piece only beats that in an inspired place.' },
+      none: { 'pt-BR': 'O quadro não passa disso em nenhum lugar.', en: 'A piece does not beat that anywhere.' },
+    }[beats];
+    parts.push(say(lang, page, 'artist cash per piece (Make Art Reward WeightedRewards, ItemData.SellValue, GetPawnRewardsForItem, Sell Pawn Item, GetProgressForState)', {
+      'pt-BR': `<strong>Dinheiro, que sozinho não vale pontos:</strong> com o sorteio deste cargo, um quadro vende em média por ${n(lang, avgSale)} na ${pawn}. Ele pede ${n(lang, ins.shifts)} turnos de trabalho se todos forem em lugar inspirado, ${n(lang, neu.shifts)} em neutro e ${n(lang, low.shifts)} sem inspiração, mais ${n(lang, sellTime)} de Tempo para vender. Isso dá ${n(lang, Math.round(ins.cash))}, ${n(lang, Math.round(neu.cash))} e ${n(lang, Math.round(low.cash))} de Dinheiro a cada 100 de Tempo, sem contar o caminho até a loja. O emprego mediano do jogo paga ${n(lang, jobMedian)} a cada 100 de Tempo. ${moneyVerdict['pt-BR']}`,
+      en: `<strong>Cash, which is worth no points by itself:</strong> with this rank's draw, a piece sells for ${n(lang, avgSale)} on average at the ${pawn}. It takes ${n(lang, ins.shifts)} shifts if they are all in inspired places, ${n(lang, neu.shifts)} in neutral ones and ${n(lang, low.shifts)} in uninspired ones, plus ${n(lang, sellTime)} Time to sell. That is ${n(lang, Math.round(ins.cash))}, ${n(lang, Math.round(neu.cash))} and ${n(lang, Math.round(low.cash))} Cash per 100 Time, not counting the walk to the shop. The game's median job pays ${n(lang, jobMedian)} per 100 Time. ${moneyVerdict.en}`,
+    }));
+    parts.push(say(lang, page, 'artist attributes per piece (JobData.Rewards, GetAttributeCostMultiplier, ProgressPainting -0.1, GetInspirationState 0.8)', {
+      'pt-BR': `<strong>Atributos:</strong> cada turno de trabalho tira ${n(lang, wear)} somando Felicidade, Saúde e Higiene no valor-base, ou ${n(lang, Math.round(wear / time * 100))} a cada 100 de Tempo; um emprego mediano tira ${n(lang, wearMedian)}. O lugar multiplica esse valor, mas por quadro pronto o inspirado é o que menos gasta: cerca de ${n(lang, ins.wear)}, contra ${n(lang, neu.wear)} em neutro e ${n(lang, low.wear)} sem inspiração. Cada turno de trabalho gasta 10% da inspiração do lugar e inspirado exige mais de 80%, então fazer os ${n(lang, ins.shifts)} turnos inspirados pede trocar de lugar ou esperar a recarga.`,
+      en: `<strong>Attributes:</strong> each shift takes ${n(lang, wear)} across Happiness, Health and Hygiene at the base value, or ${n(lang, Math.round(wear / time * 100))} per 100 Time; a median job takes ${n(lang, wearMedian)}. The place multiplies that value, but per finished piece an inspired place costs the least: about ${n(lang, ins.wear)}, against ${n(lang, neu.wear)} in a neutral one and ${n(lang, low.wear)} in an uninspired one. Each shift uses 10% of the place's inspiration and inspired needs more than 80%, so doing all ${n(lang, ins.shifts)} shifts inspired means changing places or waiting for the recharge.`,
+    }));
+    return h.callout(say(lang, page, 'label worth it', { 'pt-BR': 'Vale a pena?', en: 'Is it worth it?' }), parts.map(p => `<p>${p}</p>`).join(''));
+  }
+
+  // Cargo que ninguém assume: JobHandler.CanApplyForJob compara GetClothesTier com RequiredEquippedItemTier, nenhuma roupa passa do nível 4,
+  // e SetChamberDataForType só monta as abas 1 a 6. O salário da ficha não entra no texto de propósito.
+  function impossibleWorth(lang, j) {
+    const page = j.m_Name;
+    const top = Math.max(...h.items.filter(i => i.ItemSubGroup === 5).map(i => i.Tier));
+    const office = h.place(lang, 'Town Hall');
+    return h.callout(say(lang, page, 'label worth it', { 'pt-BR': 'Vale a pena?', en: 'Is it worth it?' }),
+      `<p>${say(lang, page, 'job cannot be taken, pay does not matter (CanApplyForJob, ItemData.Tier, SetChamberDataForType)', {
+        'pt-BR': `Este cargo não pode ser assumido nesta versão do jogo: ele pede roupa de nível ${n(lang, j.RequiredEquippedItemTier)}, as roupas só vão até o nível ${n(lang, top)}, e ele não aparece em nenhuma aba da ${office}. Como ninguém chega a ele, o que a ficha mostra não muda nada na sua partida.`,
+        en: `This job cannot be taken in this version of the game: it needs tier ${n(lang, j.RequiredEquippedItemTier)} clothes, outfits only go up to tier ${n(lang, top)}, and it appears in no tab at the ${office}. Since nobody can reach it, what its sheet shows changes nothing in your game.`,
+      })}</p>`);
+  }
+
   // Cargos do Artista: Artist.CheckForJobChange (rank = nível de EXP de Trabalho, no máximo 6),
   // RoleArtistActionTrackerTraitEffect.CheckForWorkAction (tudo, menos Tempo, vezes a inspiração do lugar).
   function artistBlock(lang, j) {
@@ -130,10 +202,10 @@ module.exports = function (h) {
         en: `Each shift costs ${n(lang, time)} Time, always. Happiness, Health and Hygiene on the sheet below are the base value: the game multiplies them by the inspiration of the place where you paint, by 0.5 when uninspired, 0.8 when neutral and 1.3 when inspired. An empty place does not let you paint. The piece in progress advances 8%, 15% or 25% per shift, in that same order. Details in ${roleLink}.`,
       })}</p>`);
 
-    return h.howBlock(lang, lead, [income, rank, paint, cost], 'jobs');
+    return h.howBlock(lang, lead, [income, artistWorth(lang, j), rank, paint, cost], 'jobs');
   }
 
-  return { wearNote, actionExtra, artistBlock };
+  return { wearNote, actionExtra, artistBlock, impossibleWorth };
 };
 module.exports.titleFix = titleFix;
 module.exports.flavorFix = flavorFix;

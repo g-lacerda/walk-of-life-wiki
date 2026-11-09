@@ -68,13 +68,13 @@ module.exports = function (h) {
 
     if (m.PermanentGlobalEventId) return permanent(lang, m, s);
     if (m.LoopingGlobalEventId) return { tier: 'setup',
-      html: `<p>${s('LoopingGlobalEventId (GlobalEventManager.SeedLoopingGlobalEvents, ScheduleNextLoops, CanLoop)', 'O Grande Jogo, evento global, se repete ao longo da partida: quando termina, o jogo agenda a próxima rodada dele.', 'The Big Game Global Event repeats through the match: when one ends, the game schedules the next run.')}</p><p>${guide(lang, 'global-events', 'Veja os Eventos Globais', 'See Global Events')}.</p>`,
+      html: `<p>${s('LoopingGlobalEventId (GlobalEventManager.SeedLoopingGlobalEvents, ScheduleNextLoops, CanLoop)', 'O Grande Jogo, evento global, se repete ao longo da partida: quando um termina, o jogo já marca o próximo.', 'The Big Game Global Event repeats through the match: when one ends, the game schedules the next run.')}</p><p>${guide(lang, 'global-events', 'Veja os Eventos Globais', 'See Global Events')}.</p>`,
       pick: '' };
 
     const name = m.m_Name;
     if (name === 'Landscaping' || name === "School's Out") {
       const loc = deref(m.ClosedLocations[0]);
-      return { tier: 'setup', html: `<p>${s('ClosedLocations (BuildingManager.AddModifierClosedLocations)', `Este local fica fechado a partida inteira: ${link(lang, loc, title(lang, loc))}.`, `This location stays closed for the whole match: ${link(lang, loc, title(lang, loc))}.`)}</p>`,
+      return { tier: 'setup', html: `<p>${s('ClosedLocations (BuildingManager.AddModifierClosedLocations)', `Ninguém entra ${placeIn(lang, loc.m_Name)} durante a partida inteira.`, `This location stays closed for the whole match: ${link(lang, loc, title(lang, loc))}.`)}</p>`,
         pick: s('pick closed location', 'Escolha para jogar sem esse lugar e forçar outros caminhos.', 'Pick it to play without this place and force other routes.') };
     }
     if (name === 'Silver Spoon' || name === 'Street Rat') {
@@ -157,20 +157,20 @@ module.exports = function (h) {
       }
       if (name === 'Futurism') {
         const act = deref(effect.ChamberActions[0]);
-        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Vexcorp - Teleport Rewards)', 'Acrescenta a ação', 'Adds the action')} ${actionName(lang, act)}. ${s('teleport cost', 'Cada uso custa:', 'Each use costs:')}</p>${effects(lang, act.Rewards.RewardEntries.filter(e => e.Type === 10))}${gameTextCallout(lang, m, s)}`, pick: pick('futurism', 'Escolha para encurtar os deslocamentos da partida.', 'Pick it to cut travel across the match.') };
+        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Vexcorp - Teleport Rewards)', 'Acrescenta a ação', 'Adds the action')} ${actionName(lang, act)}. ${s('Add-Teleporter-Everywhere (Chambers empty, OncePerLocation, TriggerType.TeleportToBuilding)', 'Ela aparece em uma sala de cada local e teletransporta você para outro local.', 'It appears in one room of every location and teleports you to another location.')} ${s('teleport cost', 'Cada uso custa:', 'Each use costs:')}</p>${effects(lang, act.Rewards.RewardEntries.filter(e => e.Type === 10))}`, pick: pick('futurism', 'Escolha para encurtar os deslocamentos da partida.', 'Pick it to cut travel across the match.') };
       }
       if (name === 'Community Service') {
         const act = deref(effect.ChamberActions[0]);
-        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Clean Up Trash Rewards)', 'Acrescenta a ação', 'Adds the action')} ${actionName(lang, act)}. ${s('cleanup cost', 'Cada uso custa:', 'Each use costs:')}</p>${effects(lang, act.Rewards.RewardEntries.filter(e => e.Type === 10))}${gameTextCallout(lang, m, s)}`, pick: '' };
+        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Clean Up Trash Rewards)', 'Acrescenta a ação', 'Adds the action')} ${actionName(lang, act)}. ${s('Add-Clean-The-Trash-In-Park-Trait-Effect (Chambers empty, OncePerLocation, SkipEnteringPlayersHomeLocation; ResolveLocation has no location filter)', 'Ela aparece em uma sala de cada local, menos na sua moradia. O texto do jogo fala só no Parque, mas a regra não limita o lugar.', 'It appears in one room of every location except your own home. The game text only mentions the Park, but the rule does not limit the place.')} ${s('cleanup cost', 'Cada uso custa:', 'Each use costs:')}</p>${effects(lang, act.Rewards.RewardEntries.filter(e => e.Type === 10))}${actionGoal(lang, m, s, act)}`, pick: '' };
       }
       if (name === 'School Fundraiser') {
         const act = deref(effect.ChamberActions[0]), academy = placeOf(lang, 'Academy');
-        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Donate to the School, Academy Old 1 chamber)', `Acrescenta ${placeIn(lang, 'Academy')} a ação`, `Adds at ${academy} the action`)} ${actionName(lang, act)}. ${s('donate effect', 'Cada doação muda assim:', 'Each donation changes:')}</p>${effects(lang, act.Rewards.RewardEntries.filter(e => e.Type === 10))}`, pick: '' };
+        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Donate to the School, Academy Old 1 chamber)', `Acrescenta ${placeIn(lang, 'Academy')} a ação`, `Adds this action at ${academy}:`)} ${actionName(lang, act)}. ${s('donate effect', 'Cada doação muda assim:', 'Each donation changes:')}</p>${effects(lang, act.Rewards.RewardEntries.filter(e => e.Type === 10))}${spendGoal(lang, m, s, 'Academy')}`, pick: '' };
       }
       if (name === 'Friendship Crates') {
         const buy = deref(effect.ChamberActions[0]);
         const park = placeOf(lang, 'Garden City');
-        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Buy Friendship Crate, Garden Pond chamber)', `Acrescenta ${placeIn(lang, 'Garden City')} a ação`, `Adds at ${park} the action`)} ${actionName(lang, buy)}. ${s('crate cost', 'Cada compra custa:', 'Each purchase costs:')}</p>${effects(lang, buy.Rewards.RewardEntries.filter(e => e.Type === 10))}<p>${s('FriendshipCrateGiveReportTraitEffect (OnRoundStarted, PickRecipient)', 'Na rodada seguinte, outro jogador recebe uma recompensa sorteada dessa caixa.', 'On the next round, another player receives a random reward from the crate.')}</p>`, pick: '' };
+        return { tier: 'numbers', html: `<p>${s('AddChamberActionTraitEffect (Buy Friendship Crate, Garden Pond chamber)', `Acrescenta ${placeIn(lang, 'Garden City')} a ação`, `Adds this action at ${park}:`)} ${actionName(lang, buy)}. ${s('crate cost', 'Cada compra custa:', 'Each purchase costs:')}</p>${effects(lang, buy.Rewards.RewardEntries.filter(e => e.Type === 10))}<p>${s('FriendshipCrateGiveReportTraitEffect (OnRoundStarted, PickRecipient)', 'Na rodada seguinte, outro jogador recebe uma recompensa sorteada dessa caixa.', 'On the next round, another player receives a random reward from the crate.')}</p>${actionGoal(lang, m, s, buy)}`, pick: '' };
       }
     }
 
@@ -179,6 +179,20 @@ module.exports = function (h) {
     if (m.SpecialOperation === 'Shuffle City') return { tier: 'setup', html: `<p>${s('BuildingManager.PrepareShuffleSeed (Shuffle City)', 'O mapa é embaralhado uma vez, no início da partida. Os prédios mudam de lugar e o traçado pode ficar estranho.', 'The map is shuffled once, at the start of the match. Buildings move and the layout can look odd.')}</p>`, pick: pick('shuffle', 'Escolha para mudar a cidade que você já conhece.', 'Pick it to change a city you already know.') };
     if (m.SpecialOperation === 'Land of Confusion') return { tier: 'setup', html: `<p>${s('BuildingManager.ReshuffleMapForRoundEnd (Land of Confusion)', 'O mapa é embaralhado de novo ao fim de cada rodada: os prédios não ficam no mesmo lugar por muito tempo.', 'The map is reshuffled at the end of every round: buildings do not stay in one place for long.')}</p>`, pick: pick('land of confusion', 'Escolha para uma partida em que o caminho muda toda rodada.', 'Pick it for a match where the route changes every round.') };
     return { tier: 'text', html: gameTextCallout(lang, m, s), pick: '' };
+  }
+
+  // ChallengeData.Objectives: alvo por jogador humano e somado entre todos (ScaleTargetByPlayerCount, Aggregation 1 = SumAcrossPlayers).
+  const goalOf = (m, test) => namedChallenges(m).flatMap(c => (c.Objectives || []).map(o => ({ c, o, r: (c.references || {})[o.Objective.rid] }))).find(x => x.r && x.o.ScaleTargetByPlayerCount && x.o.Aggregation === 1 && test(x.r));
+  const challengeName = (lang, c) => { const t = tx(lang, c.NameTerm); return t ? spanLang(lang, t) : esc(c.m_Name); };
+  function actionGoal(lang, m, s, act) {
+    const g = goalOf(m, r => r.$type === 'PerformActionQuestObjective' && r.ActionData && r.ActionData.id === act._id);
+    if (!g) return '';
+    return `<p>${s('challenge goal: uses of the action (PerformActionQuestObjective, ScaleTargetByPlayerCount, SumAcrossPlayers)', `O desafio ${challengeName(lang, g.c)} pede ${number(lang, g.r.Count)} usos desta ação por jogador humano, somados entre todos.`, `The ${challengeName(lang, g.c)} challenge asks for ${number(lang, g.r.Count)} uses of this action per human player, added up across everyone.`)}</p>`;
+  }
+  function spendGoal(lang, m, s, place) {
+    const g = goalOf(m, r => r.$type === 'SpendAttributeAtLocationQuestObjective' && r.TargetLocation && (deref(r.TargetLocation) || {}).m_Name === place);
+    if (!g) return '';
+    return `<p>${s('challenge goal: Cash spent at a place (SpendAttributeAtLocationQuestObjective, ScaleTargetByPlayerCount, SumAcrossPlayers)', `O desafio ${challengeName(lang, g.c)} pede que o grupo gaste ${number(lang, g.r.TargetValue)} de Dinheiro ${placeIn(lang, place)} por jogador humano.`, `The ${challengeName(lang, g.c)} challenge asks the group to spend ${number(lang, g.r.TargetValue)} Cash at ${placeOf(lang, place)} per human player.`)}</p>`;
   }
 
   function gameTextCallout(lang, m, s) {
@@ -228,7 +242,7 @@ module.exports = function (h) {
     const facts = [
       ...(offeredInMenu(m) ? [fact(plain(ui(lang, 'category')), catLabel(lang, catOf(m)))] : []),
       fact(hubText(lang, 'modifiers_where'), esc(whereLabel(lang, m))),
-      fact(hubText(lang, 'modifiers_index'), signed(lang, m.DifficultyIndex)),
+      fact(hubText(lang, 'modifiers_index'), `${signed(lang, m.DifficultyIndex)} <span class="muted">${m.DifficultyIndex > 0 ? s('index reading easier (ModifierPanel, DifficultyIndex)', '(mais fácil)', '(easier)') : m.DifficultyIndex < 0 ? s('index reading harder (ModifierPanel, DifficultyIndex)', '(mais difícil)', '(harder)') : s('index reading neutral (ModifierPanel, DifficultyIndex)', '(neutro)', '(neutral)')}</span>`),
     ];
     if (EASY.has(m._id)) facts.push(fact(s('fact preset', 'Predefinição', 'Preset'), s('preset easy', 'Faz parte da dificuldade Fácil', 'Part of the Easy difficulty')));
     if (HARD.has(m._id)) facts.push(fact(s('fact preset', 'Predefinição', 'Preset'), s('preset hard', 'Faz parte da dificuldade Difícil', 'Part of the Hard difficulty')));
@@ -236,7 +250,7 @@ module.exports = function (h) {
     const challengeList = namedChallenges(m).map(c => { const t = tx(lang, c.NameTerm); return t ? spanLang(lang, t) : esc(c.m_Name); });
     const calls = [];
     if (peers.length) calls.push(callout(s('label conflicts (ConflictGroup, ModifierData.ConflictsWith)', 'Não combina com', 'Cannot be combined with'), `<p>${peers.map(p => link(lang, p, title(lang, p))).join(', ')}</p>`));
-    if (challengeList.length) calls.push(callout(s('label challenges (ChallengeData.Modifiers)', 'Usado nos desafios', 'Used in challenges'), `<p>${challengeList.join(', ')}</p>`));
+    if (challengeList.length) calls.push(callout(s('label challenges (ChallengeData.Modifiers)', 'Usado nos desafios', 'Used in challenges'), `<p>${challengeList.join(', ')}</p>${offeredInMenu(m) ? '' : `<p class="muted">${s('what a challenge is (ChallengeData.Modifiers: fixed, the picker never lets a player edit it)', 'Desafio é uma partida pronta, com modificadores fixos que você não escolhe.', 'A challenge is a ready-made match with fixed modifiers you do not choose.')}</p>`}`));
     if (d.pick) calls.push(callout(s('label pick', 'Quando escolher', 'When to pick it'), `<p>${d.pick}</p>`));
     const head = `${crumbs(lang, 'modifiers', title(lang, m))}<h1>${title(lang, m)}</h1>${flavor(lang, m)}${howBlock(lang, '', calls)}`;
     const body = `<section class="art-section"><h2>${s('h what it does', 'O que muda', 'What it changes')}</h2>${d.html}</section>`;
