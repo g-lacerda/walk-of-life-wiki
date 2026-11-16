@@ -427,7 +427,7 @@ Cargos com `JobLevel` 11 a 16 (17): fechado por análise estática. `SetChamberD
 | Mapa embaralhado | Shuffle City embaralha ao preparar o mapa; Land of Confusion reembaralha ao fim de cada rodada | `BuildingManager.PrepareShuffleSeed`, `ReshuffleMapForRoundEnd` |
 | Locais fechados | `ClosedLocations`: Academia (School's Out), Parque (Landscaping) | `BuildingManager.AddModifierClosedLocations` |
 | Fome na carteira | `Forget Me Not`: ícone de Fome mostrado | `PlayerCard.SetFoodIcon` |
-| Toque de recolher (Police State) | Sem usar Dormir no turno: multa de `min(200, Dinheiro)` | `PvpCurfewSleepTraitEffect`, `PvpManager.RequestAlwaysOnCurfewPunish_RPC`, `PunishForBrokenCurfew`, `CurfewPenalty` 200 |
+| Toque de recolher (Police State) | Sem usar Dormir no turno: multa de `min(200, Dinheiro)`; em dívida, não paga nada (corrigido na v1.5.2, antes pagava ao jogador) | `PvpCurfewSleepTraitEffect`, `PvpManager.RequestAlwaysOnCurfewPunish_RPC`, `PunishForBrokenCurfew`, `CurfewPenalty` 200 |
 | Grande Jogo mais caro | Cada ação de `SupportActions`: `valor + valor × (Percentage − 1) × piso(rodada / 4)` | `MultAttributeCostEveryXRoundsTraitEffect.CheckForChamberAction` `0x1807C0AD0`, `Mod-Mult-Big-Game-Prices` |
 
 

@@ -140,7 +140,7 @@
  "A paper you buy and sell on the Stock Exchange. Sale profit becomes points.": "証券取引で売買する有価証券です。売却益はポイントになります。",
  "A pawned item stays in the shop for {0} rounds.": "質入れしたアイテムは、{0}ラウンドの間ショップに残ります。",
  "A perk or special rule you get from a role, an item, a pet or a course, which changes what actions do.": "ロール、アイテム、ペット、教育から得られるパークや特別ルールで、アクションの内容を変えます。",
- "A permanent curfew: if you end your turn without using the Sleep action you pay a {0} Cash fine, or all your Cash if you have less.": "常に夜間外出禁止令が出ています。アクション「睡眠」を使わずにターンを終えると、罰金としてお金{0}を支払います。所持金がそれより少なければ全額です。",
+ "A permanent curfew: if you end your turn without using the Sleep action you pay a {0} Cash fine, or all your Cash if you have less. If you are in debt, you pay nothing.": "常に夜間外出禁止令が出ています。アクション「睡眠」を使わずにターンを終えると、罰金としてお金{0}を支払います。所持金がそれより少なければ全額です。借金があるときは何も支払いません。",
  "A pet (frog) you buy at the Pet Shop.": "ペットショップで買えるペット（カエル）。",
  "A pet (red panda) you buy at the Pet Shop.": "ペットショップで買えるペット（レッサーパンダ）。",
  "A pet has its own Happiness, Health and Hygiene, from {0} to {1}, starting at {2} each. If any is below {3}% of the maximum, the pet is <strong>neglected</strong>. If all are at {4}% or more, it is <strong>pampered</strong>. In between, it is <strong>content</strong>. Playing and bathing raise its attributes; food prevents hunger.": "ペットには独自の幸福、健康、衛生があり、{0}から{1}の範囲で、どれも{2}から始まります。どれかが最大値の{3}%を下回ると、ペットは<strong>放置</strong>状態になります。すべてが{4}%以上なら<strong>甘やかし</strong>、その間は<strong>ご機嫌</strong>です。遊んだり入浴させたりすると属性が上がり、えさは空腹を防ぎます。",

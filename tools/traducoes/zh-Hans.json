@@ -140,7 +140,7 @@
  "A paper you buy and sell on the Stock Exchange. Sale profit becomes points.": "你在证券交易所买卖的一种凭证。卖出的利润会变成分数。",
  "A pawned item stays in the shop for {0} rounds.": "当掉的物品会在店里保留{0}轮。",
  "A perk or special rule you get from a role, an item, a pet or a course, which changes what actions do.": "你从职业、物品、宠物或课程中得到的福利或特殊规则，会改变行动的效果。",
- "A permanent curfew: if you end your turn without using the Sleep action you pay a {0} Cash fine, or all your Cash if you have less.": "永久宵禁：如果你结束回合时没有使用睡觉行动，就要付{0}现金罚款，现金不够时则付光所有现金。",
+ "A permanent curfew: if you end your turn without using the Sleep action you pay a {0} Cash fine, or all your Cash if you have less. If you are in debt, you pay nothing.": "永久宵禁：如果你结束回合时没有使用睡觉行动，就要付{0}现金罚款，现金不够时则付光所有现金。负债时不用付钱。",
  "A pet (frog) you buy at the Pet Shop.": "你在宠物店买的宠物（青蛙）。",
  "A pet (red panda) you buy at the Pet Shop.": "你在宠物店买的宠物（小熊猫）。",
  "A pet has its own Happiness, Health and Hygiene, from {0} to {1}, starting at {2} each. If any is below {3}% of the maximum, the pet is <strong>neglected</strong>. If all are at {4}% or more, it is <strong>pampered</strong>. In between, it is <strong>content</strong>. Playing and bathing raise its attributes; food prevents hunger.": "宠物有自己的幸福、健康和个人卫生，范围从{0}到{1}，初始各为{2}。只要其中任何一项低于最大值的{3}%，宠物就<strong>被冷落</strong>。如果全部达到{4}%或以上，它就<strong>被宠爱</strong>。介于两者之间则<strong>满足</strong>。玩耍和洗澡会提高它的属性；食物能防止饥饿。",
