@@ -16,6 +16,9 @@ const DATA = path.join(ROOT, 'data');
 const FINAL_DIST = path.join(ROOT, 'dist');
 const DIST = path.join(ROOT, 'dist.next');
 const SITE = 'https://wolwiki.kooda.dev';
+// Cloudflare Web Analytics (Lacerda, 19/11/2026: quantas pessoas leem a wiki, sem cookie, robôs à parte). O token é
+// público (vai em toda página); o site "wolwiki.kooda.dev" foi criado no painel da conta, em Web Analytics.
+const BEACON = '<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon=\'{"token": "27d9e626d8784703aeb1bd9153dcfdb4"}\'></script>';
 const BUILD_FILE = path.join(ROOT, 'build', 'game-build.txt');
 const BUILD = process.argv[2] || (fs.existsSync(BUILD_FILE) ? fs.readFileSync(BUILD_FILE, 'utf8').trim() : '');
 
@@ -550,6 +553,7 @@ ${alternates}<link rel="alternate" hreflang="x-default" href="${SITE}/en/${sub}"
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap">
 <link rel="stylesheet" href="/assets/style.css">${SUG.head()}
+${BEACON}
 </head>
 <body>
 <a class="skip" href="#main">${esc(ui(lang, 'skip'))}</a>
@@ -2139,11 +2143,11 @@ writePage('404.html', `<!doctype html><html lang="en"><head><meta charset="utf-8
 const TURNSTILE = require('./sugestoes').SUGGESTIONS_ENABLED ? ' https://challenges.cloudflare.com' : '';
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' ${[...inlineScriptHashes].sort().join(' ')}${TURNSTILE}`,
+  `script-src 'self' ${[...inlineScriptHashes].sort().join(' ')}${TURNSTILE} https://static.cloudflareinsights.com`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self'",
-  "connect-src 'self'",
+  "connect-src 'self' https://cloudflareinsights.com",
   `frame-src ${TURNSTILE ? TURNSTILE.trim() : "'none'"}`,
   "object-src 'none'",
   "base-uri 'self'",
